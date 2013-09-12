@@ -87,7 +87,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 
 		final JFrame wind = DisplayUtilities.displaySimple(img);
 
-		final String data = "/Users/jon/Data/data-takensort.csv";
+		final String data = "/home/dd/data-takensort.csv";
 		// String data =
 		// "/Users/ss/Development/java/WAISFest13/data/data-10000.csv";
 		new FlickrCSVStream(new File(data))
