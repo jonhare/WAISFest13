@@ -21,5 +21,10 @@ public interface SoundTranslator
 	 *	@param comment The social comment.
 	 *	@param userInformation The user information.
 	 */
-	public void translate( SocialComment comment, UserInformation userInformation ); 
+	public void translate( SocialComment comment, UserInformation userInformation );
+	
+	/**
+	 *  Stop all ongoing translations.
+	 */
+	public void stop();
 }
