@@ -5,8 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.List;
 import java.util.NoSuchElementException;
 
 import javax.swing.JFrame;
@@ -19,8 +19,11 @@ import org.openimaj.math.geometry.shape.Rectangle;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.AbstractStream;
+import org.openimaj.util.stream.Stream;
 
+import uk.ac.soton.ecs.sound.vis.FlickrTagFilter;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePostedWindow;
+import uk.ac.soton.ecs.sound.vis.FlickrTimePredicate;
 
 public class FlickrCSVStream extends AbstractStream<Context> {
 	public static final String FLICKR_ID = "flickrId";
@@ -87,34 +90,49 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 
 		final JFrame wind = DisplayUtilities.displaySimple(img);
 
+		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
+
 		final String data = "/Users/jon/Data/data-takensort.csv";
 		// String data =
 		// "/Users/ss/Development/java/WAISFest13/data/data-10000.csv";
 		new FlickrCSVStream(new File(data))
+				.filter(new FlickrTimePredicate())
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
-				// .filter(new FlickrTagFilter("snow"))
 				.forEach(new Operation<Context>() {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void perform(Context object) {
 						img.multiplyInplace(0.99f);
 
-						for (final Context ctx : (List<Context>) object.get("window")) {
-							final double x = (Double) ctx.get(LONGITUDE) + 180;
-							final double y = 90 - (Double) ctx.get(LATITUDE);
+						((Stream<Context>) object.get("window"))
+								.filter(new FlickrTagFilter("snow"))
+								.forEach(new Operation<Context>() {
+									@Override
+									public void perform(Context ctx) {
+										final double x = (Double) ctx.get(LONGITUDE) + 180;
+										final double y = 90 - (Double) ctx.get(LATITUDE);
 
-							final int xx = (int) (x * (1.0 * img.getWidth() / 360));
-							final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180));
+										final int xx = (int) (x * (1.0 * img.getWidth() / 360));
+										final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180));
 
-							if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-								img.pixels[yy][xx] = 1;
-								img.drawPoint(new Point2dImpl(xx, yy), 1f, 3);
-							}
-						}
+										if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
+											img.pixels[yy][xx] = 1;
+											img.drawPoint(new Point2dImpl(xx, yy), 1f, 3);
+										}
+									}
+								});
+
 						img.drawShapeFilled(new Rectangle(0, 540, 1080, 40), 0f);
-						img.drawText("" + new Date((Long) object.get("start")), 0, 580,
-								HersheyFont.TIMES_MEDIUM, 18, 1f);
+						img.drawText(df.format(new Date((Long) object.get("start"))), 0, 580,
+								HersheyFont.ROMAN_SIMPLEX, 18, 1f);
+
 						DisplayUtilities.display(img, wind);
+
+						try {
+							Thread.sleep(1000L / 30L);
+						} catch (final InterruptedException e) {
+							e.printStackTrace();
+						}
 					}
 				});
 	}

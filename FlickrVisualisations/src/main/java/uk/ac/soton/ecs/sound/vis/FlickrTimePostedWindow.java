@@ -6,6 +6,7 @@ import org.joda.time.DateTime;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Function;
 import org.openimaj.util.stream.AbstractStream;
+import org.openimaj.util.stream.CollectionStream;
 import org.openimaj.util.stream.Stream;
 
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
@@ -58,7 +59,7 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<
 				retcontext.put("start", currentWindowStartTime);
 				retcontext.put("end", end);
 				retcontext.put("windowsize", windowLength);
-				retcontext.put("window", currentWindow);
+				retcontext.put("window", new CollectionStream<Context>(currentWindow));
 				return retcontext;
 			}
 		};
