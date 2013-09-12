@@ -3,14 +3,9 @@
  */
 package uk.ac.soton.ecs.wais.fest13.sound.midi;
 
-import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiChannel;
-import javax.sound.midi.MidiDevice;
-import javax.sound.midi.MidiDevice.Info;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Receiver;
-import javax.sound.midi.ShortMessage;
 import javax.sound.midi.Synthesizer;
 
 import org.openimaj.audio.util.WesternScaleNote;
@@ -35,13 +30,13 @@ public class MIDISoundTranslator implements SoundTranslator
 	/** Next channel on which to play a note */
 	private int nextChannel = 0;
 
-	/** Notes to generate */
+	/** Notes to generate - based on the original Hang drum */
 	private String[] notesToGenerate = new String[]{"D","A","A#","C","D","E","F"};
 	
-	/** Octaves of the notes to generate */
+	/** Octaves of the notes to generate - based on the original Hang drum too */
 	private int[] octavesOfNotesToGenerate = new int[]{3,3,3,4,4,4,4};
 
-	/** The pan controller */
+	/** The pan controller - to set where in the stereo field a note is played */
 	public int PAN_CONTROLLER = 10;
 	
 	/**

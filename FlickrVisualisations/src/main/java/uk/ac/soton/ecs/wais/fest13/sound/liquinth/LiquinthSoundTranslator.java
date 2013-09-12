@@ -3,8 +3,6 @@
  */
 package uk.ac.soton.ecs.wais.fest13.sound.liquinth;
 
-import java.util.Arrays;
-
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.Mixer.Info;
@@ -17,7 +15,8 @@ import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
 
 /**
  *	Uses the Liquinth analogue synthesizer to generate sounds for a
- *	given social comment.	
+ *	given social commen. WARNING: Currently just farts for me. Not sure
+ *	why!
  *
  *	@author David Dupplaw (dpd@ecs.soton.ac.uk)
  *  @created 12 Sep 2013
