@@ -79,7 +79,10 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 	public static void main(String[] args) throws FileNotFoundException {
 		final FImage img = new FImage(1080, 540);
 
-		new FlickrCSVStream(new File("/Users/jon/Data/data-takensort.csv")).filter(new Predicate<Context>() {
+		final String data = "/Users/jon/Data/data-takensort.csv";
+		// String data =
+		// "/Users/ss/Development/java/WAISFest13/data/data-10000.csv";
+		new FlickrCSVStream(new File(data)).filter(new Predicate<Context>() {
 			@Override
 			public boolean test(Context object) {
 				for (final String s : (String[]) object.get(TAGS)) {
