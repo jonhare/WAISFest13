@@ -22,11 +22,11 @@ public class FlickrTagFilter implements Predicate<Context> {
 	public boolean test(Context object) {
 		final String[] tags = (String[]) object.get("tags");
 		for (final String string : tags) {
-			if (!this.filterHash.contains(string)) {
-				return false;
+			if (this.filterHash.contains(string)) {
+				return true;
 			}
 		}
-		return true;
+		return false;
 	}
 
 }

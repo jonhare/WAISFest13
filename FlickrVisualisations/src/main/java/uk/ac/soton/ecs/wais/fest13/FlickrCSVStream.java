@@ -15,7 +15,9 @@ import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JFrame;
 
 import org.openimaj.image.DisplayUtilities;
-import org.openimaj.image.FImage;
+import org.openimaj.image.MBFImage;
+import org.openimaj.image.colour.ColourSpace;
+import org.openimaj.image.colour.RGBColour;
 import org.openimaj.image.typography.hershey.HersheyFont;
 import org.openimaj.math.geometry.point.Point2dImpl;
 import org.openimaj.math.geometry.shape.Rectangle;
@@ -58,9 +60,9 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 	private static final class FlickrImageDrawOperation implements
 			Operation<Context>
 	{
-		private final FImage img;
+		private final MBFImage img;
 
-		private FlickrImageDrawOperation(FImage img) {
+		private FlickrImageDrawOperation(MBFImage img) {
 			this.img = img;
 		}
 
@@ -73,8 +75,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180));
 
 			if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-				img.pixels[yy][xx] = 1;
-				img.drawPoint(new Point2dImpl(xx, yy), 1f, 3);
+				img.drawPoint(new Point2dImpl(xx, yy), RGBColour.YELLOW, 3);
 			}
 		}
 	}
@@ -139,16 +140,16 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, MidiUnavailableException {
-		final FImage img = new FImage(1080, 580);
+		final MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
 
 		final JFrame wind = DisplayUtilities.displaySimple(img);
 
 		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		// final String data = "/Users/jon/Data/data-takensort.csv";
+		final String data = "/Users/jon/Data/data-takensort.csv";
 		// final String data = "/home/dd/data-takensort.csv";
-		final String data =
-				"/Users/ss/Development/java/WAISFest13/data-taken.csv";
+		// final String data =
+		// "/Users/ss/Development/java/WAISFest13/data-taken.csv";
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 		final SoundTranslator trans = new MIDISoundTranslator();
 		new FlickrCSVStream(new File(data))
@@ -158,22 +159,23 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void perform(Context object) {
-						img.multiplyInplace(0.99f);
+						img.multiplyInplace(0.95f);
 						comments.clear();
-						final Operation<Context> op = new FlickrImageDrawOperation(img);
+
 						((Stream<Context>) object.get("window"))
 								.filter(new FlickrTagFilter("snow"))
 								.filter(new PassThrough<Context>(new FlickrImageDrawOperation(img)))
 								.filter(new PassThrough<Context>(new FlickrImageSoundOperation(comments)))
 								.forEach(new GetAll<Context>());
+
 						UserInformation userInformation = new UserInformation();
 						userInformation = new UserInformation();
 						userInformation.location = new GeoLocation(51.5, 0);
 						trans.translate(comments, userInformation);
 
-						img.drawShapeFilled(new Rectangle(0, 540, 1080, 40), 0f);
+						img.drawShapeFilled(new Rectangle(0, 540, 1080, 40), RGBColour.BLACK);
 						img.drawText(df.format(new Date((Long) object.get("start"))), 0, 580,
-								HersheyFont.ROMAN_SIMPLEX, 18, 1f);
+								HersheyFont.ROMAN_SIMPLEX, 18, RGBColour.WHITE);
 
 						DisplayUtilities.display(img, wind);
 
