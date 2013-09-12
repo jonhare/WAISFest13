@@ -3,6 +3,9 @@
  */
 package uk.ac.soton.ecs.wais.fest13.sound.liquinth;
 
+import java.util.Collection;
+import java.util.Collections;
+
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.Mixer;
 import javax.sound.sampled.Mixer.Info;
@@ -70,13 +73,13 @@ public class LiquinthSoundTranslator implements SoundTranslator
 		player.setMixer( mixer );
 		new Thread( player ).start();
 	}
-	
+
 	/**
 	 *	{@inheritDoc}
-	 * 	@see uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator#translate(uk.ac.soton.ecs.wais.fest13.SocialComment, uk.ac.soton.ecs.wais.fest13.UserInformation)
+	 * 	@see uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator#translate(java.util.Collection, uk.ac.soton.ecs.wais.fest13.UserInformation)
 	 */
 	@Override
-	public void translate( SocialComment comment, UserInformation userInformation )
+	public void translate( Collection<SocialComment> comment, UserInformation userInformation )
 	{
 		synth.noteOn( 60, 100 );
 	}
@@ -116,7 +119,7 @@ public class LiquinthSoundTranslator implements SoundTranslator
 		// Translate some social comment to sound.
 		SocialComment comment = new SocialComment();
 		UserInformation userInformation = new UserInformation();		
-		lst.translate( comment, userInformation );
+		lst.translate( Collections.singleton( comment ), userInformation );
 		
 		// Wait for a bit.
 		Thread.sleep( 2000 );

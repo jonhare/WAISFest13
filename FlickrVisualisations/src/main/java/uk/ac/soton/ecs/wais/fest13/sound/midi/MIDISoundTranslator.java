@@ -3,6 +3,11 @@
  */
 package uk.ac.soton.ecs.wais.fest13.sound.midi;
 
+import gnu.trove.list.array.TIntArrayList;
+
+import java.util.Collection;
+import java.util.Collections;
+
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
@@ -13,6 +18,7 @@ import org.openimaj.audio.util.WesternScaleNote;
 import uk.ac.soton.ecs.jsh2.mediaeval13.placing.evaluation.GeoLocation;
 import uk.ac.soton.ecs.wais.fest13.SocialComment;
 import uk.ac.soton.ecs.wais.fest13.UserInformation;
+import uk.ac.soton.ecs.wais.fest13.aggregators.AverageGeoLocation;
 import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
 
 /**
@@ -42,6 +48,18 @@ public class MIDISoundTranslator implements SoundTranslator
 	/** The volume controller - to audibly represent the distance from our user */
 	public int VOLUME_CONTROLLER = 7;
 	
+	/** Channels not to use for general comment translation (0-indexed) */
+	private TIntArrayList reservedChannels = new TIntArrayList( new int[]{9,1,2,3} );
+	
+	/** Aggregator to work out the average geo location */
+	private AverageGeoLocation avGeoLocAggregator = new AverageGeoLocation();
+	
+	/** 
+	 * 	A memory of which notes are on which channels (to turn them off before
+	 *  we change the sound or change the channel setup.
+	 */
+	private int[] notesOn = new int[16];
+	
 	/**
 	 * 	Default constructor
 	 *	@throws MidiUnavailableException If a synth could not be created
@@ -54,11 +72,14 @@ public class MIDISoundTranslator implements SoundTranslator
 
 	/**
 	 *	{@inheritDoc}
-	 * 	@see uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator#translate(uk.ac.soton.ecs.wais.fest13.SocialComment, uk.ac.soton.ecs.wais.fest13.UserInformation)
+	 * 	@see uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator#translate(java.util.Collection, uk.ac.soton.ecs.wais.fest13.UserInformation)
 	 */
 	@Override
-	public void translate( SocialComment comment, UserInformation userInformation )
+	public void translate( Collection<SocialComment> comment, UserInformation userInformation )
 	{
+		// The average geo location of all the comments
+		GeoLocation gl = avGeoLocAggregator.aggregate( comment, userInformation );
+		
 		// Give a bit more range to the notes we've provided
 		int alterOctave = (int)(Math.random()*3)-1;
 		
@@ -77,19 +98,29 @@ public class MIDISoundTranslator implements SoundTranslator
 		
 		// Set the pan position
 		chan.controlChange( PAN_CONTROLLER, 
-			getPanPosition( comment.location.longitude ) );
+			getPanPosition( gl.longitude ) );
 		
 		// Set the volume based on the distance from the observer
 		chan.controlChange( VOLUME_CONTROLLER, 
-			getUserDistanceVolume( comment.location, userInformation.location ) );
+			getUserDistanceVolume( gl, userInformation.location ) );
+		
+		// Stop the previous note on this channel
+		chan.noteOff( notesOn[ nextChannel ] );
 		
 		// Play the note
 		chan.noteOn( note.noteNumber, 100 );
+		notesOn[ nextChannel ] = note.noteNumber;
 		
-		// increment the channel. We don't use channel 10 (drums in GM)
+		// Increment the channel to the next one.
 		nextChannel++;
-		if( nextChannel == 9 ) nextChannel++;
 		nextChannel %= 16;
+		
+		// Check if it's a reserved channel
+		while( reservedChannels.contains( nextChannel ) )
+		{
+			nextChannel++;
+			nextChannel %= 16;
+		}
 	}
 	
 	/**
@@ -127,8 +158,10 @@ public class MIDISoundTranslator implements SoundTranslator
 		double d = R * c;
 		
 		// The maximum great circle distance is just over 20000km, so we'll
-		// divide by that and multiply by the maximum our volume can be
-		int volume = (int)(d * 127 / 20020);
+		// divide by that and multiply by the maximum our volume can be. In this
+		// case to avoid completely inaudible updates, our minimum will be
+		// 27, so range = 100
+		int volume = (int)(d * 100 / 20020) + 27;
 		
 		return volume;
 	}
@@ -161,7 +194,7 @@ public class MIDISoundTranslator implements SoundTranslator
 			SocialComment comment = new SocialComment();
 			comment.location = new GeoLocation( Math.random()*90, Math.random()*360-180 );
 			
-			mst.translate( comment, userInformation );
+			mst.translate( Collections.singleton(comment), userInformation );
 			Thread.sleep( 600 );
 		}
 		

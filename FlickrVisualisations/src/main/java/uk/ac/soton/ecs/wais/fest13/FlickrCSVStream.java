@@ -93,8 +93,10 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
 		final String data = "/Users/jon/Data/data-takensort.csv";
+		// final String data = "/home/dd/data-takensort.csv";
 		// String data =
 		// "/Users/ss/Development/java/WAISFest13/data/data-10000.csv";
+
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
