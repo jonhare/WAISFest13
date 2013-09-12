@@ -107,7 +107,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 						img.multiplyInplace(0.99f);
 
 						((Stream<Context>) object.get("window"))
-								.filter(new FlickrTagFilter("snow"))
+								.filter(new FlickrTagFilter("snow", "southampton"))
 								.forEach(new Operation<Context>() {
 									@Override
 									public void perform(Context ctx) {
