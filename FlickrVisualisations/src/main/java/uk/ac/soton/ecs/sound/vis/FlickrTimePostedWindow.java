@@ -7,13 +7,10 @@ import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Function;
 import org.openimaj.util.stream.AbstractStream;
 import org.openimaj.util.stream.Stream;
-import org.openimaj.util.stream.window.RealTimeWindowFunction;
-import org.openimaj.util.stream.window.Window;
 
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 
-public class FlickrTimePostedWindow implements Function<Stream<Context>,Stream<Context>> {
-
+public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<Context>> {
 	private long windowLength;
 
 	public FlickrTimePostedWindow(Long windowLength) {
@@ -28,34 +25,39 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>,Stream<C
 			public boolean hasNext() {
 				return inner.hasNext();
 			}
+
 			@Override
 			public Context next() {
 				Context item = inner.next();
-				Long itemtime = item.getTyped(FlickrCSVStream.DATE_UPLOADED);
+
+				Long itemtime = item.getTyped(FlickrCSVStream.DATE_TAKEN);
 				long currentWindowStartTime = itemtime;
-				DateTime startDate = new DateTime(currentWindowStartTime * 1000);
-//				System.out.println("Start date is: " + startDate + " "+ currentWindowStartTime * 1000);
+				final DateTime startDate = new DateTime(currentWindowStartTime * 1000);
+				// System.out.println("Start date is: " + startDate + " "+
+				// currentWindowStartTime * 1000);
 				currentWindowStartTime = startDate.withMillisOfDay(0).getMillis();
 				final ArrayList<Context> currentWindow = new ArrayList<Context>();
 				currentWindow.add(item);
 				long end = 0;
-				while(inner.hasNext()){
-					itemtime = (Long)item.getTyped(FlickrCSVStream.DATE_UPLOADED) * 1000;
-//					System.out.println("Item date is: " + new DateTime(itemtime) + " " + itemtime);
-					
+				while (inner.hasNext()) {
+					itemtime = (Long) item.getTyped(FlickrCSVStream.DATE_TAKEN) * 1000;
+					// System.out.println("Item date is: " + new
+					// DateTime(itemtime) + " " + itemtime);
+
 					item = inner.next();
-					if(itemtime - currentWindowStartTime >= FlickrTimePostedWindow.this.windowLength){
-//						System.out.println("Found window end: " + windowLength);
+					if (itemtime - currentWindowStartTime >= FlickrTimePostedWindow.this.windowLength) {
+						// System.out.println("Found window end: " +
+						// windowLength);
 						currentWindow.add(item);
-						end = itemtime; 
+						end = itemtime;
 						break;
 					}
 					currentWindow.add(item);
 				}
-				Context retcontext = new Context();
-				retcontext.put("start",currentWindow);
-				retcontext.put("end",end);
-				retcontext.put("windowsize",windowLength);
+				final Context retcontext = new Context();
+				retcontext.put("start", currentWindowStartTime);
+				retcontext.put("end", end);
+				retcontext.put("windowsize", windowLength);
 				retcontext.put("window", currentWindow);
 				return retcontext;
 			}
