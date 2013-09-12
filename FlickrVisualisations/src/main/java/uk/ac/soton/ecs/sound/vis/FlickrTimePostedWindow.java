@@ -30,7 +30,7 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<
 			public Context next() {
 				Context item = inner.next();
 
-				Long itemtime = item.getTyped(FlickrCSVStream.DATE_UPLOADED);
+				Long itemtime = item.getTyped(FlickrCSVStream.DATE_TAKEN);
 				long currentWindowStartTime = itemtime;
 				final DateTime startDate = new DateTime(currentWindowStartTime * 1000);
 				// System.out.println("Start date is: " + startDate + " "+
@@ -40,7 +40,7 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<
 				currentWindow.add(item);
 				long end = 0;
 				while (inner.hasNext()) {
-					itemtime = (Long) item.getTyped(FlickrCSVStream.DATE_UPLOADED) * 1000;
+					itemtime = (Long) item.getTyped(FlickrCSVStream.DATE_TAKEN) * 1000;
 					// System.out.println("Item date is: " + new
 					// DateTime(itemtime) + " " + itemtime);
 
@@ -55,7 +55,7 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<
 					currentWindow.add(item);
 				}
 				final Context retcontext = new Context();
-				retcontext.put("start", currentWindow);
+				retcontext.put("start", currentWindowStartTime);
 				retcontext.put("end", end);
 				retcontext.put("windowsize", windowLength);
 				retcontext.put("window", currentWindow);
