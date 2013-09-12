@@ -8,13 +8,18 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.NoSuchElementException;
 
+import javax.swing.JFrame;
+
 import org.openimaj.image.DisplayUtilities;
 import org.openimaj.image.FImage;
+import org.openimaj.image.typography.hershey.HersheyFont;
 import org.openimaj.math.geometry.point.Point2dImpl;
+import org.openimaj.math.geometry.shape.Rectangle;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
-import org.openimaj.util.function.Predicate;
 import org.openimaj.util.stream.AbstractStream;
+
+import uk.ac.soton.ecs.sound.vis.FlickrTagFilter;
 
 public class FlickrCSVStream extends AbstractStream<Context> {
 	public static final String FLICKR_ID = "flickrId";
@@ -77,39 +82,39 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
-		final FImage img = new FImage(1080, 540);
+		final FImage img = new FImage(1080, 580);
+
+		final JFrame wind = DisplayUtilities.displaySimple(img);
 
 		final String data = "/Users/jon/Data/data-takensort.csv";
 		// String data =
 		// "/Users/ss/Development/java/WAISFest13/data/data-10000.csv";
-		new FlickrCSVStream(new File(data)).filter(new Predicate<Context>() {
-			@Override
-			public boolean test(Context object) {
-				for (final String s : (String[]) object.get(TAGS)) {
-					if (s.equalsIgnoreCase("snow")) {
-						System.out.println(new Date((Long) object.get(DATE_TAKEN) * 1000));
-						return true;
+		new FlickrCSVStream(new File(data))
+				// .transform(new FlickrTimePostedWindow(24 * 60 * 60))
+				.filter(new FlickrTagFilter("snow"))
+				.forEach(new Operation<Context>() {
+					@Override
+					public void perform(Context object) {
+						final double x = (Double) object.get(LONGITUDE) + 180;
+						final double y = 90 - (Double) object.get(LATITUDE);
+
+						final int xx = (int) (x * (1.0 * img.getWidth() / 360));
+						final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180));
+
+						if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
+							img.multiplyInplace(0.995f);
+							img.pixels[yy][xx] = 1;
+							img.drawPoint(new Point2dImpl(xx, yy), 1f, 3);
+
+							img.drawShapeFilled(new Rectangle(0, 540, 1080, 40), 0f);
+							img.drawText("" + new Date((Long) object.get(DATE_TAKEN) * 1000L), 0, 580,
+									HersheyFont.TIMES_MEDIUM,
+									18,
+									1f);
+							DisplayUtilities.display(img, wind);
+							// java.awt.Toolkit.getDefaultToolkit().beep();
+						}
 					}
-				}
-				return false;
-			}
-		}).forEach(new Operation<Context>() {
-			@Override
-			public void perform(Context object) {
-				final double x = (Double) object.get(LONGITUDE) + 180;
-				final double y = 90 - (Double) object.get(LATITUDE);
-
-				final int xx = (int) (x * (1.0 * img.getWidth() / 360));
-				final int yy = (int) (y * (1.0 * img.getHeight() / 180));
-
-				if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-					img.multiplyInplace(0.995f);
-					img.pixels[yy][xx] = 1;
-					img.drawPoint(new Point2dImpl(xx, yy), 1f, 3);
-					DisplayUtilities.displayName(img, "foo");
-					// java.awt.Toolkit.getDefaultToolkit().beep();
-				}
-			}
-		});
+				});
 	}
 }
