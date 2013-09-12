@@ -2,6 +2,7 @@ package uk.ac.soton.ecs.sound.vis;
 
 import java.util.ArrayList;
 
+import org.joda.time.DateTime;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Function;
 import org.openimaj.util.stream.AbstractStream;
@@ -9,11 +10,13 @@ import org.openimaj.util.stream.Stream;
 import org.openimaj.util.stream.window.RealTimeWindowFunction;
 import org.openimaj.util.stream.window.Window;
 
+import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
+
 public class FlickrTimePostedWindow implements Function<Stream<Context>,Stream<Context>> {
 
 	private long windowLength;
 
-	public FlickrTimePostedWindow(long windowLength) {
+	public FlickrTimePostedWindow(Long windowLength) {
 		this.windowLength = windowLength;
 	}
 
@@ -28,14 +31,23 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>,Stream<C
 			@Override
 			public Context next() {
 				Context item = inner.next();
-				long currentWindowStartTime = (Long) item.get("dateUploaded");
+				Long itemtime = item.getTyped(FlickrCSVStream.DATE_UPLOADED);
+				long currentWindowStartTime = itemtime;
+				DateTime startDate = new DateTime(currentWindowStartTime * 1000);
+//				System.out.println("Start date is: " + startDate + " "+ currentWindowStartTime * 1000);
+				currentWindowStartTime = startDate.withMillisOfDay(0).getMillis();
 				final ArrayList<Context> currentWindow = new ArrayList<Context>();
 				currentWindow.add(item);
 				long end = 0;
 				while(inner.hasNext()){
+					itemtime = (Long)item.getTyped(FlickrCSVStream.DATE_UPLOADED) * 1000;
+//					System.out.println("Item date is: " + new DateTime(itemtime) + " " + itemtime);
+					
 					item = inner.next();
-					if((Long)item.get("dateUploaded") - currentWindowStartTime >= FlickrTimePostedWindow.this.windowLength){
-						end = (Long)item.get("dateUploaded"); 
+					if(itemtime - currentWindowStartTime >= FlickrTimePostedWindow.this.windowLength){
+//						System.out.println("Found window end: " + windowLength);
+						currentWindow.add(item);
+						end = itemtime; 
 						break;
 					}
 					currentWindow.add(item);

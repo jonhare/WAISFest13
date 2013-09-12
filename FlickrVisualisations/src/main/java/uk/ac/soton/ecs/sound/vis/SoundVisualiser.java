@@ -21,25 +21,25 @@ public class SoundVisualiser {
 		// the tag tfilter
 		.filter(new FlickrTagFilter("snow"))
 		// render the individual items
-		.filter(new Predicate<Context>() {
-			@Override
-			public boolean test(Context object) {
-				final double x = (Double) object.get(FlickrCSVStream.LONGITUDE) + 180;
-				final double y = 90 - (Double) object.get(FlickrCSVStream.LATITUDE);
-
-				final int xx = (int) (x) * (1 * img.getWidth() / 360);
-				final int yy = (int) (y) * (1 * img.getHeight() / 180);
-
-				if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-					img.pixels[yy][xx]++;
-					DisplayUtilities.displayName(img, "foo");
-					java.awt.Toolkit.getDefaultToolkit().beep();
-				}
-				return true;
-			}
-		})
+//		.filter(new Predicate<Context>() {
+//			@Override
+//			public boolean test(Context object) {
+//				final double x = (Double) object.get(FlickrCSVStream.LONGITUDE) + 180;
+//				final double y = 90 - (Double) object.get(FlickrCSVStream.LATITUDE);
+//
+//				final int xx = (int) (x) * (1 * img.getWidth() / 360);
+//				final int yy = (int) (y) * (1 * img.getHeight() / 180);
+//
+//				if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
+//					img.pixels[yy][xx]++;
+//					DisplayUtilities.displayName(img, "foo");
+//					java.awt.Toolkit.getDefaultToolkit().beep();
+//				}
+//				return true;
+//			}
+//		})
 		// window by time
-		.transform(new FlickrTimePostedWindow(10 * 60 * 1000))
+		.transform(new FlickrTimePostedWindow(365l* 24l * 60l * 60l * 1000l))
 		// decide what sound should be played
 		.forEach(new FlickrSoundCreator());
 	}
