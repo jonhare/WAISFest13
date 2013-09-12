@@ -77,6 +77,7 @@ public class MIDISoundTranslator implements SoundTranslator
 	@Override
 	public void translate( Collection<SocialComment> comment, UserInformation userInformation )
 	{
+		if(comment.size() == 0) return;
 		// The average geo location of all the comments
 		GeoLocation gl = avGeoLocAggregator.aggregate( comment, userInformation );
 		
@@ -90,7 +91,7 @@ public class MIDISoundTranslator implements SoundTranslator
 				octavesOfNotesToGenerate[indx]+alterOctave );
 		
 		// Get the channel
-		System.out.println( nextChannel );
+//		System.out.println( nextChannel );
 		MidiChannel chan = synth.getChannels()[nextChannel];
 		
 		// For now we will just use the piano

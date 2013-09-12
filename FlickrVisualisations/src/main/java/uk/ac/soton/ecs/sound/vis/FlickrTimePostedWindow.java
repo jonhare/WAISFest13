@@ -12,6 +12,7 @@ import org.openimaj.util.stream.Stream;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 
 public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<Context>> {
+	public static final String WINDOW = "window";
 	private long windowLength;
 
 	public FlickrTimePostedWindow(Long windowLength) {
@@ -59,7 +60,7 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<
 				retcontext.put("start", currentWindowStartTime);
 				retcontext.put("end", end);
 				retcontext.put("windowsize", windowLength);
-				retcontext.put("window", new CollectionStream<Context>(currentWindow));
+				retcontext.put(WINDOW, new CollectionStream<Context>(currentWindow));
 				return retcontext;
 			}
 		};
