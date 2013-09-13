@@ -106,7 +106,7 @@ public class BackgroundMusic
 	 */
 	private final String[] tracks = new String[]
 	{ 		"H2+P38+D2.50       D2 D3 - . D2 . . D2 - . . . . D3 D3 /", 
-			"H3+P44+D2.30+E6.35 . . . . . . . . . . . F6 . . . /",
+			"H3+P44+D2.10+E6.15 . . . . . . . . . . . F6 . . . /",
 			"H10+F#3.40 F#3.20 F#3 F#3 F#3.40 F#3.20 F#3 F#3 " + 
 					"F#3.40 F#3.20 F#3 F#3 F#3.40 F#3.20 F#3 F#3 /", 
 			"H10 . . . E2.40 . . . . . . . E2 . . . /",

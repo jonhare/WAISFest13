@@ -5,6 +5,10 @@ package uk.ac.soton.ecs.wais.fest13.sound.midi;
 
 import gnu.trove.list.array.TIntArrayList;
 
+import com.sun.media.sound.SF2Soundbank;
+
+import java.io.IOException;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 
@@ -15,6 +19,7 @@ import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequencer;
+import javax.sound.midi.Soundbank;
 import javax.sound.midi.Synthesizer;
 
 import org.openimaj.audio.util.WesternScaleNote;
@@ -68,7 +73,7 @@ public class MIDISoundTranslator implements SoundTranslator
 	private AverageSentimentAggregator avSentimentAggregator = new AverageSentimentAggregator();
 	
 	/** Whether to generate background tracks */
-	private boolean useBackground = false;
+	private boolean useBackground = true;
 	
 	/** 
 	 * 	A memory of which notes are on which channels (to turn them off before
@@ -107,6 +112,20 @@ public class MIDISoundTranslator implements SoundTranslator
 	{
 		// Open the synthesizer to play the music
 		this.synth = MidiSystem.getSynthesizer();
+		
+		try
+		{
+			Soundbank soundbank = new SF2Soundbank(
+			        MIDISoundTranslator.class.getResourceAsStream( "/8MBGMSFX.SF2" ) );
+			this.synth.loadAllInstruments(soundbank);
+			System.out.println( "Loaded soundbank. "+Arrays.toString(this.synth.getAvailableInstruments()) );
+		}
+		catch( IOException e1 )
+		{
+			System.out.println( "Unable to load soundbank. Using default." );
+			e1.printStackTrace();
+		}
+		
 		synth.open();
 		
 		// Setup the sequencer for the background music, if we're going
