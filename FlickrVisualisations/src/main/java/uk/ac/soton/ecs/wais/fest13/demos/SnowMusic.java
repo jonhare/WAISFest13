@@ -62,7 +62,7 @@ public class SnowMusic {
 
 						((Stream<Context>) object.get("window"))
 								.filter(new FlickrTagFilter("snow"))
-								.filter(new PassThrough<Context>(new FlickrImageDrawOperation(img)))
+								.filter(new PassThrough<Context>(new FlickrImageDrawOperation(img, RGBColour.YELLOW)))
 								.filter(new PassThrough<Context>(new FlickrImageSoundOperation(comments)))
 								.forEach(new GetAll<Context>());
 

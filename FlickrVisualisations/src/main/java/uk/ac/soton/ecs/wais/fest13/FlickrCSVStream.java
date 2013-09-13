@@ -29,7 +29,6 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 
 		@Override
 		public void perform(Context object) {
-
 			comments.add(contextToSocial(object));
 		}
 
@@ -45,9 +44,11 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			Operation<Context>
 	{
 		private final MBFImage img;
+		private final Float[] colour;
 
-		public FlickrImageDrawOperation(MBFImage img) {
+		public FlickrImageDrawOperation(MBFImage img, Float[] colour) {
 			this.img = img;
+			this.colour = colour;
 		}
 
 		@Override
@@ -59,7 +60,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180));
 
 			if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-				img.drawPoint(new Point2dImpl(xx, yy), RGBColour.YELLOW, 3);
+				img.drawPoint(new Point2dImpl(xx, yy), colour, 3);
 			}
 		}
 	}
