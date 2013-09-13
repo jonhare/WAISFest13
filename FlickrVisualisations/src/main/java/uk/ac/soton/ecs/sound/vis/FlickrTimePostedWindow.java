@@ -14,9 +14,16 @@ import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<Context>> {
 	public static final String WINDOW = "window";
 	private long windowLength;
+	private int subsample;
 
 	public FlickrTimePostedWindow(Long windowLength) {
 		this.windowLength = windowLength;
+		this.subsample = -1;
+	}
+	
+	public FlickrTimePostedWindow(Long windowLength, Integer subsample) {
+		this.windowLength = windowLength;
+		this.subsample = subsample;
 	}
 
 	@Override
@@ -54,7 +61,8 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<
 						end = itemtime;
 						break;
 					}
-					currentWindow.add(item);
+					if(subsample > 0 && currentWindow.size() < subsample)
+						currentWindow.add(item);
 				}
 				final Context retcontext = new Context();
 				retcontext.put("start", currentWindowStartTime);

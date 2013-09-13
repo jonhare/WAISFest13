@@ -26,21 +26,21 @@ import uk.ac.soton.ecs.sound.vis.FlickrTimePostedWindow;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePredicate;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream.FlickrImageSoundOperation;
-import uk.ac.soton.ecs.wais.fest13.FlickrImageDrawOperation;
 import uk.ac.soton.ecs.wais.fest13.FullScreenDemo;
 import uk.ac.soton.ecs.wais.fest13.GetAll;
 import uk.ac.soton.ecs.wais.fest13.PassThrough;
 import uk.ac.soton.ecs.wais.fest13.SocialComment;
+import uk.ac.soton.ecs.wais.fest13.StaticWorldMap;
 import uk.ac.soton.ecs.wais.fest13.UserInformation;
 import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
 import uk.ac.soton.ecs.wais.fest13.sound.midi.MIDISoundTranslator;
 
 public class SnowMusic {
 	public static void main(String[] args) throws FileNotFoundException, MidiUnavailableException {
-		final MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
-		final JFrame wind = DisplayUtilities.displaySimple(img);
-//		final MBFImage img = FullScreenDemo.createImage();
-//		final JFrame wind = FullScreenDemo.display(img, "Snow Music");
+//		final MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
+//		final JFrame wind = DisplayUtilities.displaySimple(img);
+		final MBFImage img = FullScreenDemo.createImage();
+		final JFrame wind = FullScreenDemo.display(img, "Snow Music");
 
 		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
@@ -52,13 +52,15 @@ public class SnowMusic {
 		final FlickrImageDrawOperation imagePointOp = new FlickrImageDrawOperation(img, RGBColour.YELLOW);
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 		final SoundTranslator trans = new MIDISoundTranslator();
+		final MBFImage worldMap = StaticWorldMap.getMap(img.getWidth(), img.getHeight(),RGBColour.BLACK,RGBColour.BLACK,RGBColour.WHITE);
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
-				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
+				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L,1000))
 				.forEach(new Operation<Context>() {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void perform(Context object) {
+						img.fill(RGBColour.BLACK);
 						comments.clear();
 
 						((Stream<Context>) object.get("window"))
@@ -72,12 +74,16 @@ public class SnowMusic {
 						userInformation = new UserInformation();
 						userInformation.location = new GeoLocation(51.5, 0);
 						trans.translate(comments, userInformation);
-
-//						heatmapOp.windowDrawn(object);
-						imagePointOp.windowDrawn(object);
 						
-						DisplayUtilities.display(img, wind);
-//						FullScreenDemo.update(wind, img);
+						
+						heatmapOp.windowDrawn(object);
+						imagePointOp.windowDrawn(object);
+						img.divideInplace(2f);
+						img.addInplace(worldMap);
+						img.clip(0f, 1f);
+						
+//						DisplayUtilities.display(img, wind);
+						FullScreenDemo.update(wind, img);
 
 						try {
 							Thread.sleep(1000L / 30L);
