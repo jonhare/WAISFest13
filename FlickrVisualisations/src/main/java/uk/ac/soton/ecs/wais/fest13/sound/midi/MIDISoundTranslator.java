@@ -131,7 +131,7 @@ public class MIDISoundTranslator implements SoundTranslator
 				"H3+P44+D2.30+E6.35 . . . . . . . F6 . . . . . . . /",
 				"H10+F#3.60 F#3.20 F#3 F#3 F#3.60 F#3.20 F#3 F#3 "+
 						"F#3.60 F#3.20 F#3 F#3 F#3.60 F#3.20 F#3 F#3 /",
-				"H10+C3.40 . . . C3 . . . C3 . . . C3 . . . /"
+				"H10+B2.40 . . . B2 . . . B2 . . . B2 . . . /"
 		};
 
 		/** Number of ticks in each pulse of the tracks definition */
