@@ -6,20 +6,23 @@ import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Predicate;
 
 public class FlickrTagFilter implements Predicate<Context> {
-//	[tags, dateTaken, flickrId, userId, longitude, latitude, dateUploaded, url]
+	// [tags, dateTaken, flickrId, userId, longitude, latitude, dateUploaded,
+	// url]
 
 	private HashSet<String> filterHash;
-	public FlickrTagFilter(String ... filter) {
+
+	public FlickrTagFilter(String... filter) {
 		this.filterHash = new HashSet<String>();
-		for (String string : filter) {
+		for (final String string : filter) {
 			filterHash.add(string);
 		}
 	}
+
 	@Override
 	public boolean test(Context object) {
-		String[] tags = (String[]) object.get("tags");
-		for (String string : tags) {
-			if(this.filterHash.contains(string)) {
+		final String[] tags = (String[]) object.get("tags");
+		for (final String string : tags) {
+			if (this.filterHash.contains(string)) {
 				return true;
 			}
 		}

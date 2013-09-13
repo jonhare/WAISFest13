@@ -95,7 +95,13 @@
       <artifactId>common-stream</artifactId>
       <version>1.1.1-SNAPSHOT</version>
       <scope>compile</scope>
-    </dependency>
+      <exclusions>
+          <exclusion>
+              <artifactId>xercesImpl</artifactId>
+              <groupId>xerces</groupId>
+          </exclusion>
+      </exclusions>
+  </dependency>
     <dependency>
 	<groupId>liquinth</groupId>
 	<artifactId>liquinth</artifactId>
