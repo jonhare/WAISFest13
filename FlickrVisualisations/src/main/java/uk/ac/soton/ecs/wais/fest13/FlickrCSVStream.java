@@ -8,9 +8,7 @@ import java.io.IOException;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.openimaj.image.MBFImage;
-import org.openimaj.image.colour.RGBColour;
-import org.openimaj.math.geometry.point.Point2dImpl;
+import org.openimaj.image.analysis.algorithm.histogram.WindowedHistogramExtractor;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.AbstractStream;
@@ -37,31 +35,6 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			ret.location = new GeoLocation((Double) object.getTyped(FlickrCSVStream.LATITUDE),
 					(Double) object.getTyped(FlickrCSVStream.LONGITUDE));
 			return ret;
-		}
-	}
-
-	public static final class FlickrImageDrawOperation implements
-			Operation<Context>
-	{
-		private final MBFImage img;
-		private final Float[] colour;
-
-		public FlickrImageDrawOperation(MBFImage img, Float[] colour) {
-			this.img = img;
-			this.colour = colour;
-		}
-
-		@Override
-		public void perform(Context ctx) {
-			final double x = (Double) ctx.get(LONGITUDE) + 180;
-			final double y = 90 - (Double) ctx.get(LATITUDE);
-
-			final int xx = (int) (x * (1.0 * img.getWidth() / 360));
-			final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180));
-
-			if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-				img.drawPoint(new Point2dImpl(xx, yy), colour, 3);
-			}
 		}
 	}
 

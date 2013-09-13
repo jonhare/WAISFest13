@@ -100,7 +100,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		final MidiChannel chan = synth.getChannels()[nextChannel];
 
 		// For now we will just use the piano
-		chan.programChange(10);
+		chan.programChange(35);
 
 		// Set the pan position
 		chan.controlChange(PAN_CONTROLLER,
@@ -114,7 +114,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		chan.noteOff(notesOn[nextChannel]);
 
 		// Play the note
-		chan.noteOn(note.noteNumber, 100);
+		chan.noteOn(note.noteNumber, MIDIInstruments.FX_5_BRIGHTNESS);
 		notesOn[nextChannel] = note.noteNumber;
 
 		// Increment the channel to the next one.
