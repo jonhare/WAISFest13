@@ -131,7 +131,17 @@ public class MIDISoundTranslator implements SoundTranslator
 				"H3+P44+D2.30+E6.35 . . . . . . . F6 . . . . . . . /",
 				"H10+F#3.60 F#3.20 F#3 F#3 F#3.60 F#3.20 F#3 F#3 "+
 						"F#3.60 F#3.20 F#3 F#3 F#3.60 F#3.20 F#3 F#3 /",
-				"H10+B2.40 . . . B2 . . . B2 . . . B2 . . . /"
+				"H10+D3.40 . . . D3 . . . D3 . . . D3 . . . /"
+		};
+		
+		private int currentMood = 0;
+		
+		/**
+		 * 	Lists the tracks that should be unmuted for each mood level.
+		 * 	Tracks are indexed into the #tracks member, so 0-based.
+		 */
+		private TIntArrayList[] moods = new TIntArrayList[] {
+				new TIntArrayList( new int[] { 1 } )
 		};
 
 		/** Number of ticks in each pulse of the tracks definition */
@@ -155,6 +165,8 @@ public class MIDISoundTranslator implements SoundTranslator
 				return null;
 			}
 
+			double velocityScalar = 1;
+			
 			// Loop through each of the tracks.
 			for( String track: tracks )
 			{
@@ -236,7 +248,9 @@ public class MIDISoundTranslator implements SoundTranslator
 									if( currentNoteOn > 0 && !samePulse )
 										seqTrack.add( noteOff( currentChannel, currentNoteOn, timestampTick ) );
 									
-									seqTrack.add( noteOn( currentChannel, note.noteNumber, currentVelocity, timestampTick ) );
+									System.out.println( "Note on "+currentChannel+", "+note.noteNumber );
+									seqTrack.add( noteOn( currentChannel, note.noteNumber, 
+										(int)(currentVelocity*velocityScalar), timestampTick ) );
 									currentNoteOn = note.noteNumber;
 									samePulse = true;
 							}
@@ -307,6 +321,37 @@ public class MIDISoundTranslator implements SoundTranslator
 		{
 			return (tracks[0].split( "\\s+" ).length-1) * pptTracks;
 		}
+		
+		/**
+		 * 	Returns the number of moods available.
+		 *	@return The number of moods.
+		 */
+		public int getNumberOfMoods()
+		{
+			return moods.length;
+		}
+		
+		/**
+		 * 	Sets the sequencer to the appropriate mood
+		 *	@param seq
+		 */
+		public void setMood( int moodIndex, Sequencer seq )
+		{
+			for( int i = 0; i < tracks.length; i++ )
+			{
+				seq.setTrackMute( i, !moods[moodIndex].contains(i) );
+				System.out.println( "Track "+i+" set to "+seq.getTrackMute( i ) );
+			}
+		}
+		
+		/**
+		 * 	Get the current mood index.
+		 *	@return the current mood index.
+		 */
+		public int getCurrentMood()
+		{
+			return currentMood;
+		}
 	}
 	
 	/** The MIDI synth in use */
@@ -372,6 +417,9 @@ public class MIDISoundTranslator implements SoundTranslator
 					sequencer.setLoopCount( Sequencer.LOOP_CONTINUOUSLY );
 					sequencer.start();
 					sequencer.setTempoInBPM( 60 );
+					
+					backgroundMusic.setMood( 
+						backgroundMusic.getCurrentMood(), sequencer );
 				}
 				catch( InvalidMidiDataException e )
 				{
@@ -388,6 +436,9 @@ public class MIDISoundTranslator implements SoundTranslator
 	@Override
 	public void translate( Collection<SocialComment> comment, UserInformation userInformation )
 	{
+		System.out.println( comment.size() );
+		if( comment.size() == 0 ) return;
+		
 		// The average geo location of all the comments
 		GeoLocation gl = avGeoLocAggregator.aggregate( comment, userInformation );
 		
