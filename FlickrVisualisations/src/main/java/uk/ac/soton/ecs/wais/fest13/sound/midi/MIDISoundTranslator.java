@@ -68,7 +68,7 @@ public class MIDISoundTranslator implements SoundTranslator
 	private AverageSentimentAggregator avSentimentAggregator = new AverageSentimentAggregator();
 	
 	/** Whether to generate background tracks */
-	private boolean useBackground = true;
+	private boolean useBackground = false;
 	
 	/** 
 	 * 	A memory of which notes are on which channels (to turn them off before

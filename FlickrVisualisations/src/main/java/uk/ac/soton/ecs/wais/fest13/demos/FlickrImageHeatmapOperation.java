@@ -13,8 +13,8 @@ import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 
 public class FlickrImageHeatmapOperation implements Operation<Context>, WindowProcessListener {
 
-	private static final int GAUSSIANWH = 70;
-	private static final int SIGMA = 10;
+	private static final int GAUSSIANWH = 30;
+	private static final int SIGMA = 2;
 	private MBFImage img;
 	private FImage hist;
 	private FImage gaussian;

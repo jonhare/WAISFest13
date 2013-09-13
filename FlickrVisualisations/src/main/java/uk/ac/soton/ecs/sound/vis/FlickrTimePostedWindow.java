@@ -61,7 +61,7 @@ public class FlickrTimePostedWindow implements Function<Stream<Context>, Stream<
 						end = itemtime;
 						break;
 					}
-					if(subsample > 0 && currentWindow.size() < subsample)
+//					if(subsample > 0 && currentWindow.size() < subsample)
 						currentWindow.add(item);
 				}
 				final Context retcontext = new Context();
