@@ -80,6 +80,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		if(comment.size() == 0) return;
 		// The average geo location of all the comments
 		GeoLocation gl = avGeoLocAggregator.aggregate( comment, userInformation );
+		double sentimentAggregation = aggregateSentiment(comment);
 		
 		// Give a bit more range to the notes we've provided
 		int alterOctave = (int)(Math.random()*3)-1;
@@ -94,8 +95,14 @@ public class MIDISoundTranslator implements SoundTranslator
 //		System.out.println( nextChannel );
 		MidiChannel chan = synth.getChannels()[nextChannel];
 		
-		// For now we will just use the piano
-		chan.programChange( 0 );
+		if(sentimentAggregation == 0){			
+			// For now we will just use the piano
+			chan.programChange( 0 );
+		}else if(sentimentAggregation > 0){
+			chan.programChange(59);
+		} else{
+			chan.programChange(41);
+		}
 		
 		// Set the pan position
 		chan.controlChange( PAN_CONTROLLER, 
@@ -106,7 +113,8 @@ public class MIDISoundTranslator implements SoundTranslator
 			getUserDistanceVolume( gl, userInformation.location ) );
 		
 		// Stop the previous note on this channel
-		chan.noteOff( notesOn[ nextChannel ] );
+		stopallnotes();
+//		chan.noteOff( notesOn[ nextChannel ] );
 		
 		// Play the note
 		chan.noteOn( note.noteNumber, 100 );
@@ -122,6 +130,22 @@ public class MIDISoundTranslator implements SoundTranslator
 			nextChannel++;
 			nextChannel %= 16;
 		}
+	}
+
+	private void stopallnotes() {
+		for (int i = 0; i < 16; i++) {
+			MidiChannel chan = synth.getChannels()[nextChannel];
+			chan.noteOff( notesOn[ i ] );
+		}
+	}
+
+	private double aggregateSentiment(Collection<SocialComment> comment) {
+		double sentimentAggregation = 0;
+		for (SocialComment socialComment : comment) {
+			sentimentAggregation += socialComment.sentimentScore;
+		}
+		sentimentAggregation/=comment.size();
+		return sentimentAggregation;
 	}
 	
 	/**

@@ -20,6 +20,7 @@ import org.openimaj.image.typography.hershey.HersheyFont;
 import org.openimaj.math.geometry.point.Point2dImpl;
 import org.openimaj.math.geometry.shape.Rectangle;
 import org.openimaj.util.data.Context;
+import org.openimaj.util.function.Function;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.AbstractStream;
 import org.openimaj.util.stream.Stream;
@@ -49,6 +50,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 		private SocialComment contextToSocial(Context object) {
 			SocialComment ret = new SocialComment();
 			ret.location = new GeoLocation((Double)object.getTyped(FlickrCSVStream.LATITUDE), (Double)object.getTyped(FlickrCSVStream.LONGITUDE));
+			ret.sentimentScore = ((RateSentiment)object.getTyped("sentiment")).getMean();
 			return ret;
 		}
 	}
@@ -150,6 +152,15 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 		final SoundTranslator trans = new MIDISoundTranslator();
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
+				.map(new Function<Context, Context>() {
+					@Override
+					public Context apply(Context in) {
+						RateSentiment rs = new RateSentiment();
+						rs.calculate((String[]) in.getTyped(TAGS));
+						in.put("sentiment", rs);
+						return in;
+					}
+				})
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
 				.forEach(new Operation<Context>() {
 					@SuppressWarnings("unchecked")
