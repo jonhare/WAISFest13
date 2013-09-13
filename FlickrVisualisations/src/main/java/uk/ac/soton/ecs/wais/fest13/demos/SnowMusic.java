@@ -42,7 +42,7 @@ public class SnowMusic {
 		final MBFImage img = FullScreenDemo.createImage();
 		final JFrame wind = FullScreenDemo.display(img, "Snow Music");
 
-		
+		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
 		final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
 		// final String data = "/home/dd/data-takensort.csv";

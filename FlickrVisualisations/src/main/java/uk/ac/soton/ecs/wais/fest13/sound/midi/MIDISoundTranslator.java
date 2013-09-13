@@ -114,7 +114,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		chan.noteOff(notesOn[nextChannel]);
 
 		// Play the note
-		chan.noteOn(note.noteNumber, 100);
+		chan.noteOn(note.noteNumber, MIDIInstruments.FX_5_BRIGHTNESS);
 		notesOn[nextChannel] = note.noteNumber;
 
 		// Increment the channel to the next one.
