@@ -5,6 +5,8 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -27,6 +29,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 
 		@Override
 		public void perform(Context object) {
+
 			comments.add(contextToSocial(object));
 		}
 
@@ -34,6 +37,9 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			final SocialComment ret = new SocialComment();
 			ret.location = new GeoLocation((Double) object.getTyped(FlickrCSVStream.LATITUDE),
 					(Double) object.getTyped(FlickrCSVStream.LONGITUDE));
+			RateSentiment sent = new RateSentiment();
+			sent.calculate((String[])object.getTyped(FlickrCSVStream.TAGS));
+			ret.sentimentScore = sent.mean;
 			return ret;
 		}
 	}

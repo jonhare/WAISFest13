@@ -73,8 +73,8 @@ public class SnowMusic {
 						userInformation.location = new GeoLocation(51.5, 0);
 						trans.translate(comments, userInformation);
 
-						heatmapOp.windowDrawn(object);
-//						imagePointOp.windowDrawn(object);
+//						heatmapOp.windowDrawn(object);
+						imagePointOp.windowDrawn(object);
 						
 						DisplayUtilities.display(img, wind);
 //						FullScreenDemo.update(wind, img);
