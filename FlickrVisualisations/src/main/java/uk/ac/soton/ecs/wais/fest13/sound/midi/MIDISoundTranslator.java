@@ -129,8 +129,7 @@ public class MIDISoundTranslator implements SoundTranslator
 								backgroundMusic.getCurrentMood()
 									+currentMoodAcceleration, sequencer );
 							
-							notesToGenerate = backgroundMusic.getNotesToFitMood( 
-									backgroundMusic.getCurrentMood() );
+							notesToGenerate = backgroundMusic.getNotesToFitMood( backgroundMusic.getCurrentMood() );
 							
 							// Loop continuously.
 							countSinceLast = 0;
