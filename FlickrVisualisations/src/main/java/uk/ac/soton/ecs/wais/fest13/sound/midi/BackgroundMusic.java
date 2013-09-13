@@ -113,7 +113,7 @@ public class BackgroundMusic
 			"H1+D4.40+A#4+C5 . . . . . . . . . . -D4+-A#4+D4+A4+D5 . . . / ", 
 			"H1+D4.40+A4+F5 . . . . . . . . . . -D4+-A4+E4+C#5+E5 . . . / ",
 			"H3+D2.30+F6.35 . . . . . . . . . . . . . . . /",
-			"H3+P44+D5.60+A5+D6 -D5+-A5+-D6 . D5+A5+D6 -D5+-A5+-D6 . . . . . . . D5+C#6+E6 -D5+-C#6+-E6 . . / "
+			"H3+P44+D5.60+A5+D6 -D5+-A5+-D6 . D5+A5+D6 -D5+-A5+-D6 . . . . . . . D5+A6+D6 -D5+-A6+-D6 . . / "
 	};
 
 	private int currentMood = 0;
@@ -136,13 +136,13 @@ public class BackgroundMusic
 	private final String[] LOW_MOOD_NOTES = new String[]{"D3","A3","A#3","C4","D4","E4","F4"};
 	
 	/** High-mood notes */
-	private final String[] HIGH_MOOD_NOTES = new String[]{"D3","F3","G3","A#3","C#4","D4","E4"};
+//	private final String[] HIGH_MOOD_NOTES = new String[]{"D3","F3","G3","A#3","C#4","D4","E4"};
 
 	/** Notes to play that'll fit with the background */
 	private String[][] fittingNotes = new String[][]
 	{
 			LOW_MOOD_NOTES, LOW_MOOD_NOTES, LOW_MOOD_NOTES, LOW_MOOD_NOTES, LOW_MOOD_NOTES,
-			HIGH_MOOD_NOTES, HIGH_MOOD_NOTES
+			LOW_MOOD_NOTES, LOW_MOOD_NOTES,
 	};
 	
 	/** Number of ticks in each pulse of the tracks definition */

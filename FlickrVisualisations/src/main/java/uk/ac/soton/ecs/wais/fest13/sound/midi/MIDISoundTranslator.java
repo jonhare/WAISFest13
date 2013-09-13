@@ -23,6 +23,7 @@ import uk.ac.soton.ecs.jsh2.mediaeval13.placing.evaluation.GeoLocation;
 import uk.ac.soton.ecs.wais.fest13.SocialComment;
 import uk.ac.soton.ecs.wais.fest13.UserInformation;
 import uk.ac.soton.ecs.wais.fest13.aggregators.AverageGeoLocation;
+import uk.ac.soton.ecs.wais.fest13.aggregators.AverageSentimentAggregator;
 import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
 
 /**
@@ -54,11 +55,17 @@ public class MIDISoundTranslator implements SoundTranslator
 	/** The volume controller - to audibly represent the distance from our user */
 	public int VOLUME_CONTROLLER = 7;
 	
+	public int CUTOFF_FREQUENCY_CONTROLLER = 74;
+	public int FILTER_RESONANCE_CONTROLLER = 71;
+	
 	/** Channels not to use for general comment translation (0-indexed) */
 	private TIntArrayList reservedChannels = new TIntArrayList( new int[]{9,1,2,3} );
 	
 	/** Aggregator to work out the average geo location */
 	private AverageGeoLocation avGeoLocAggregator = new AverageGeoLocation();
+	
+	/** The average sentiment aggregator */
+	private AverageSentimentAggregator avSentimentAggregator = new AverageSentimentAggregator();
 	
 	/** Whether to generate background tracks */
 	private boolean useBackground = true;
@@ -81,6 +88,17 @@ public class MIDISoundTranslator implements SoundTranslator
 	/** How much the mood needs to change */
 	private int currentMoodAcceleration = 0;
 	
+	/** Instruments to change mood - from negative to positive */
+	private int[] moodInstruments = new int[]{
+			MIDIInstruments.BARITONE_SAX,
+			MIDIInstruments.ACOUSTIC_GUITAR_NYLON,
+			MIDIInstruments.KALIMBA,
+			MIDIInstruments.ACOUSTIC_GRAND_PIANO,	// Middle
+			MIDIInstruments.ACOUSTIC_GUITAR_STEEL,
+			MIDIInstruments.FX_3_CRYSTAL,
+			MIDIInstruments.FX_5_BRIGHTNESS,
+	};
+
 	/**
 	 * 	Default constructor
 	 *	@throws MidiUnavailableException If a synth could not be created
@@ -161,6 +179,11 @@ public class MIDISoundTranslator implements SoundTranslator
 		// The average geo location of all the comments
 		GeoLocation gl = avGeoLocAggregator.aggregate( comment, userInformation );
 		
+		// The average sentiment of all the comments
+		double sentimentScore = avSentimentAggregator .aggregate( comment, userInformation );
+		sentimentScore = (int)(64+(sentimentScore*64));
+		System.out.println( "Sentiment: "+sentimentScore );
+		
 		// Give a bit more range to the notes we've provided
 		int alterOctave = (int)(Math.random()*3)-1;
 		
@@ -173,8 +196,11 @@ public class MIDISoundTranslator implements SoundTranslator
 		// Get the channel
 		MidiChannel chan = synth.getChannels()[nextChannel];
 		
-		// For now we will just use the piano
-		chan.programChange( 0 );
+		// Choose an appropriate instrument based on sentiment.
+		int prog = moodInstruments[(int)Math.max( 0, Math.min( 
+				moodInstruments.length-1, sentimentScore*moodInstruments.length/127 ) )];
+		System.out.println( "Program: "+prog );
+		chan.programChange( prog );
 		
 		// Set the pan position
 		chan.controlChange( PAN_CONTROLLER, 
@@ -183,6 +209,10 @@ public class MIDISoundTranslator implements SoundTranslator
 		// Set the volume based on the distance from the observer
 		chan.controlChange( VOLUME_CONTROLLER, 
 			getUserDistanceVolume( gl, userInformation.location ) );
+		
+		// Set the brightness of the sound based on the sentiment score
+		chan.controlChange( FILTER_RESONANCE_CONTROLLER, 40 );
+		chan.controlChange( CUTOFF_FREQUENCY_CONTROLLER, (int)sentimentScore );
 		
 		// Stop the previous note on this channel
 		chan.noteOff( notesOn[ nextChannel ] );
@@ -241,7 +271,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		// divide by that and multiply by the maximum our volume can be. In this
 		// case to avoid completely inaudible updates, our minimum will be
 		// 27, so range = 100
-		int volume = (int)(d * 100 / 20020) + 27;
+		int volume = 127-((int)(d * 100 / 20020) + 27);
 		
 		return volume;
 	}
@@ -269,10 +299,10 @@ public class MIDISoundTranslator implements SoundTranslator
 
 		// Create 20 random social comments
 		MIDISoundTranslator mst = new MIDISoundTranslator();
-		for( int i = 0; i <1; i++ )
+		for( int i = 0; i < 36; i++ )
 		{
 			SocialComment comment = new SocialComment();
-			comment.location = new GeoLocation( Math.random()*90, Math.random()*360-180 );
+			comment.location = new GeoLocation( /*Math.random()*9*/0, i*10-180 );
 			
 			mst.translate( Collections.singleton(comment), userInformation );
 			Thread.sleep( 600 );
