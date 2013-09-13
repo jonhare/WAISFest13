@@ -100,7 +100,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		final MidiChannel chan = synth.getChannels()[nextChannel];
 
 		// For now we will just use the piano
-		chan.programChange(10);
+		chan.programChange(35);
 
 		// Set the pan position
 		chan.controlChange(PAN_CONTROLLER,
