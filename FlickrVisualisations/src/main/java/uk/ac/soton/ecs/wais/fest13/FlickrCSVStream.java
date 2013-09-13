@@ -5,12 +5,16 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
 import org.openimaj.image.MBFImage;
 import org.openimaj.image.colour.RGBColour;
+import org.openimaj.image.typography.hershey.HersheyFont;
 import org.openimaj.math.geometry.point.Point2dImpl;
+import org.openimaj.math.geometry.shape.Rectangle;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.AbstractStream;
@@ -37,6 +41,9 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			final SocialComment ret = new SocialComment();
 			ret.location = new GeoLocation((Double) object.getTyped(FlickrCSVStream.LATITUDE),
 					(Double) object.getTyped(FlickrCSVStream.LONGITUDE));
+			RateSentiment sent = new RateSentiment();
+			sent.calculate((String[])object.getTyped(FlickrCSVStream.TAGS));
+			ret.sentimentScore = sent.mean;
 			return ret;
 		}
 	}
@@ -45,7 +52,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			Operation<Context>
 	{
 		private final MBFImage img;
-
+		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 		public FlickrImageDrawOperation(MBFImage img) {
 			this.img = img;
 		}
@@ -61,6 +68,12 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
 				img.drawPoint(new Point2dImpl(xx, yy), RGBColour.YELLOW, 3);
 			}
+		}
+
+		public void windowDrawn(Context object) {
+			img.drawShapeFilled(new Rectangle(0, img.getHeight() - 40, img.getWidth(), 40), RGBColour.BLACK);
+			img.drawText(df.format(new Date((Long) object.get("start"))), 0, img.getHeight(),
+					HersheyFont.ROMAN_SIMPLEX, 18, RGBColour.WHITE);
 		}
 	}
 
