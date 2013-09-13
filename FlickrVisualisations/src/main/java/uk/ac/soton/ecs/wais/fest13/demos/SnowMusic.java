@@ -31,6 +31,7 @@ import uk.ac.soton.ecs.wais.fest13.FullScreenDemo;
 import uk.ac.soton.ecs.wais.fest13.GetAll;
 import uk.ac.soton.ecs.wais.fest13.PassThrough;
 import uk.ac.soton.ecs.wais.fest13.SocialComment;
+import uk.ac.soton.ecs.wais.fest13.StaticWorldMap;
 import uk.ac.soton.ecs.wais.fest13.UserInformation;
 import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
 import uk.ac.soton.ecs.wais.fest13.sound.midi.MIDISoundTranslator;
@@ -52,6 +53,12 @@ public class SnowMusic {
 		final FlickrImageDrawOperation imagePointOp = new FlickrImageDrawOperation(img, RGBColour.YELLOW);
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 		final SoundTranslator trans = new MIDISoundTranslator();
+		
+		final MBFImage worldmap = StaticWorldMap.getMap(wind.getWidth(), wind.getHeight(),
+				new Float[]{1f, 1f, 1f, 0f},
+				new Float[]{1f, 1f, 1f, 0f},
+				new Float[]{1f, 1f, 1f, 0.2f});
+		
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
@@ -59,6 +66,8 @@ public class SnowMusic {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void perform(Context object) {
+						img.multiplyInplace(0.95f);
+						img.drawImage(worldmap, 0, 0);
 						comments.clear();
 
 						((Stream<Context>) object.get("window"))
@@ -75,6 +84,8 @@ public class SnowMusic {
 
 //						heatmapOp.windowDrawn(object);
 						imagePointOp.windowDrawn(object);
+								HersheyFont.ROMAN_SIMPLEX, 18, RGBColour.WHITE);
+						
 						
 						DisplayUtilities.display(img, wind);
 //						FullScreenDemo.update(wind, img);
