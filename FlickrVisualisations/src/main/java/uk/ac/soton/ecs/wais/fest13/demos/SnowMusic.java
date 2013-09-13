@@ -27,6 +27,7 @@ import uk.ac.soton.ecs.sound.vis.FlickrTimePredicate;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream.FlickrImageDrawOperation;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream.FlickrImageSoundOperation;
+import uk.ac.soton.ecs.wais.fest13.FullScreenDemo;
 import uk.ac.soton.ecs.wais.fest13.GetAll;
 import uk.ac.soton.ecs.wais.fest13.PassThrough;
 import uk.ac.soton.ecs.wais.fest13.SocialComment;
@@ -36,17 +37,17 @@ import uk.ac.soton.ecs.wais.fest13.sound.midi.MIDISoundTranslator;
 
 public class SnowMusic {
 	public static void main(String[] args) throws FileNotFoundException, MidiUnavailableException {
-		final MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
-
-		final JFrame wind = DisplayUtilities.displaySimple(img);
+//		final MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
+//		final JFrame wind = DisplayUtilities.displaySimple(img);
+		final MBFImage img = FullScreenDemo.createImage();
+		final JFrame wind = FullScreenDemo.display(img, "Snow Music");
 
 		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-//		final String data = "/Users/jon/Data/data-takensort.csv";
 		final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
 		// final String data = "/home/dd/data-takensort.csv";
-		// final String data =
-		// "/Users/ss/Development/java/WAISFest13/data-taken.csv";
+		// final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
+//		final String data = "/Users/jamie/Data/data-taken.csv";
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 		final SoundTranslator trans = new MIDISoundTranslator();
 		new FlickrCSVStream(new File(data))
@@ -70,11 +71,12 @@ public class SnowMusic {
 						userInformation.location = new GeoLocation(51.5, 0);
 						trans.translate(comments, userInformation);
 
-						img.drawShapeFilled(new Rectangle(0, 540, 1080, 40), RGBColour.BLACK);
-						img.drawText(df.format(new Date((Long) object.get("start"))), 0, 580,
+						img.drawShapeFilled(new Rectangle(0, img.getHeight() - 40, img.getWidth(), 40), RGBColour.BLACK);
+						img.drawText(df.format(new Date((Long) object.get("start"))), 0, img.getHeight(),
 								HersheyFont.ROMAN_SIMPLEX, 18, RGBColour.WHITE);
 
-						DisplayUtilities.display(img, wind);
+//						DisplayUtilities.display(img, wind);
+						FullScreenDemo.update(wind, img);
 
 						try {
 							Thread.sleep(1000L / 30L);
