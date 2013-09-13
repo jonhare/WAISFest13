@@ -14,7 +14,7 @@ public class FlickrTagFilter implements Predicate<Context> {
 	public FlickrTagFilter(String... filter) {
 		this.filterHash = new HashSet<String>();
 		for (final String string : filter) {
-			filterHash.add(string);
+			filterHash.add(string.toLowerCase());
 		}
 	}
 
@@ -22,7 +22,7 @@ public class FlickrTagFilter implements Predicate<Context> {
 	public boolean test(Context object) {
 		final String[] tags = (String[]) object.get("tags");
 		for (final String string : tags) {
-			if (this.filterHash.contains(string)) {
+			if (this.filterHash.contains(string.toLowerCase())) {
 				return true;
 			}
 		}
