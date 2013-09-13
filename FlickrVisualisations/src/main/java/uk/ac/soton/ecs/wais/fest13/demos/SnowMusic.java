@@ -84,8 +84,6 @@ public class SnowMusic {
 
 //						heatmapOp.windowDrawn(object);
 						imagePointOp.windowDrawn(object);
-								HersheyFont.ROMAN_SIMPLEX, 18, RGBColour.WHITE);
-						
 						
 						DisplayUtilities.display(img, wind);
 //						FullScreenDemo.update(wind, img);
