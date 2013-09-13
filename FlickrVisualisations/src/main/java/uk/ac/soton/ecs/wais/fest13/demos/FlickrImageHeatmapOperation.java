@@ -35,7 +35,6 @@ public class FlickrImageHeatmapOperation implements Operation<Context>, WindowPr
 				final int xx = (int) (x * (1.0 * img.getWidth() / 360)) + i - GAUSSIANWH/2;
 				final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180)) + j - GAUSSIANWH/2;
 				if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-					System.out.println(xx + "+" + yy);
 					hist.pixels[yy][xx] += this.gaussian.pixels[i][j];
 				}
 			}

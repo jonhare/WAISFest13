@@ -34,6 +34,7 @@ import uk.ac.soton.ecs.wais.fest13.SocialComment;
 import uk.ac.soton.ecs.wais.fest13.StaticWorldMap;
 import uk.ac.soton.ecs.wais.fest13.UserInformation;
 import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
+import uk.ac.soton.ecs.wais.fest13.sound.midi.BasicMIDISoundTranslator;
 import uk.ac.soton.ecs.wais.fest13.sound.midi.MIDISoundTranslator;
 
 public class SnowMusic {
@@ -45,14 +46,18 @@ public class SnowMusic {
 
 		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
+//		final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
 		// final String data = "/home/dd/data-takensort.csv";
 		// final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
-//		final String data = "/Users/jamie/Data/data-taken.csv";
+		final String data = "/Users/jamie/Data/data-taken.csv";
+		
 		final FlickrImageHeatmapOperation heatmapOp = new FlickrImageHeatmapOperation(img);
 		final FlickrImageDrawOperation imagePointOp = new FlickrImageDrawOperation(img, RGBColour.YELLOW);
+		
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
+		
 		final SoundTranslator trans = new MIDISoundTranslator();
+//		final SoundTranslator trans = new BasicMIDISoundTranslator();
 		
 		final MBFImage worldmap = StaticWorldMap.getMap(wind.getWidth(), wind.getHeight(),
 				new Float[]{1f, 1f, 1f, 0f},
