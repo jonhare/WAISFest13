@@ -69,17 +69,10 @@ public class MIDISoundTranslator implements SoundTranslator
 
 	/** Whether to generate background tracks */
 	private boolean useBackground = false;
-<<<<<<< HEAD
 
 	/**
 	 * A memory of which notes are on which channels (to turn them off before we
 	 * change the sound or change the channel setup.
-=======
-	
-	/** 
-	 * 	A memory of which notes are on which channels (to turn them off before
-	 *  we change the sound or change the channel setup.
->>>>>>> b756787b6c869c3d80754b2faab4ae907be7f469
 	 */
 	private int[] notesOn = new int[16];
 
@@ -206,7 +199,6 @@ public class MIDISoundTranslator implements SoundTranslator
 		note.noteNumber += 12 * alterOctave;
 
 		// Get the channel
-<<<<<<< HEAD
 		final MidiChannel chan = synth.getChannels()[nextChannel];
 
 		// Choose an appropriate instrument based on sentiment.
@@ -214,13 +206,6 @@ public class MIDISoundTranslator implements SoundTranslator
 				moodInstruments.length - 1, sentimentScore * moodInstruments.length / 127))];
 		System.out.println("Program: " + prog);
 		chan.programChange(prog);
-=======
-		// System.out.println( nextChannel );
-		final MidiChannel chan = synth.getChannels()[nextChannel];
-
-		// For now we will just use the piano
-		chan.programChange(35);
->>>>>>> b756787b6c869c3d80754b2faab4ae907be7f469
 
 		// Set the pan position
 		chan.controlChange(PAN_CONTROLLER,
@@ -238,11 +223,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		chan.noteOff(notesOn[nextChannel]);
 
 		// Play the note
-<<<<<<< HEAD
 		chan.noteOn(note.noteNumber, 100);
-=======
-		chan.noteOn(note.noteNumber, MIDIInstruments.FX_5_BRIGHTNESS);
->>>>>>> b756787b6c869c3d80754b2faab4ae907be7f469
 		notesOn[nextChannel] = note.noteNumber;
 
 		// Increment the channel to the next one.
