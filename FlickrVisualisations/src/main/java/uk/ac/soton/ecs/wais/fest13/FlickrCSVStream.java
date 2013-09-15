@@ -10,11 +10,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.openimaj.image.MBFImage;
-import org.openimaj.image.colour.RGBColour;
-import org.openimaj.image.typography.hershey.HersheyFont;
-import org.openimaj.math.geometry.point.Point2dImpl;
-import org.openimaj.math.geometry.shape.Rectangle;
+import org.openimaj.image.analysis.algorithm.histogram.WindowedHistogramExtractor;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.AbstractStream;
@@ -45,35 +41,6 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			sent.calculate((String[])object.getTyped(FlickrCSVStream.TAGS));
 			ret.sentimentScore = sent.mean;
 			return ret;
-		}
-	}
-
-	public static final class FlickrImageDrawOperation implements
-			Operation<Context>
-	{
-		private final MBFImage img;
-		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
-		public FlickrImageDrawOperation(MBFImage img) {
-			this.img = img;
-		}
-
-		@Override
-		public void perform(Context ctx) {
-			final double x = (Double) ctx.get(LONGITUDE) + 180;
-			final double y = 90 - (Double) ctx.get(LATITUDE);
-
-			final int xx = (int) (x * (1.0 * img.getWidth() / 360));
-			final int yy = (int) (y * (1.0 * (img.getHeight() - 40) / 180));
-
-			if (xx >= 0 && xx < img.getWidth() && yy >= 0 && yy < img.getHeight()) {
-				img.drawPoint(new Point2dImpl(xx, yy), RGBColour.YELLOW, 3);
-			}
-		}
-
-		public void windowDrawn(Context object) {
-			img.drawShapeFilled(new Rectangle(0, img.getHeight() - 40, img.getWidth(), 40), RGBColour.BLACK);
-			img.drawText(df.format(new Date((Long) object.get("start"))), 0, img.getHeight(),
-					HersheyFont.ROMAN_SIMPLEX, 18, RGBColour.WHITE);
 		}
 	}
 

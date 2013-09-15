@@ -8,13 +8,9 @@ import gnu.trove.list.array.TIntArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import javax.sound.midi.InvalidMidiDataException;
-import javax.sound.midi.MetaEventListener;
-import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
-import javax.sound.midi.Sequencer;
 import javax.sound.midi.Synthesizer;
 
 import org.openimaj.audio.util.WesternScaleNote;
@@ -23,7 +19,6 @@ import uk.ac.soton.ecs.jsh2.mediaeval13.placing.evaluation.GeoLocation;
 import uk.ac.soton.ecs.wais.fest13.SocialComment;
 import uk.ac.soton.ecs.wais.fest13.UserInformation;
 import uk.ac.soton.ecs.wais.fest13.aggregators.AverageGeoLocation;
-import uk.ac.soton.ecs.wais.fest13.aggregators.AverageSentimentAggregator;
 import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
 
 /**
@@ -33,7 +28,7 @@ import uk.ac.soton.ecs.wais.fest13.sound.SoundTranslator;
  * @created 12 Sep 2013
  * @version $Author$, $Revision$, $Date$
  */
-public class MIDISoundTranslator implements SoundTranslator
+public class BasicMIDISoundTranslator implements SoundTranslator
 {
 	/** The MIDI synth in use */
 	private Synthesizer synth;
@@ -41,13 +36,11 @@ public class MIDISoundTranslator implements SoundTranslator
 	/** Next channel on which to play a note */
 	private int nextChannel = 0;
 
-	/**
-	 * These will be the notes to generate. We'll get the actual notes from the
-	 * BackgroundMusic instance if it's switched on. These notes will be used if
-	 * the background music is off. They are notes based on the original Panart
-	 * hang-drum.
-	 */
-	private String[] notesToGenerate = new String[] { "D3", "A3", "A#3", "C4", "D4", "E4", "F4" };
+	/** Notes to generate - based on the original Hang drum */
+	private String[] notesToGenerate = new String[] { "D", "A", "A#", "C", "D", "E", "F" };
+
+	/** Octaves of the notes to generate - based on the original Hang drum too */
+	private int[] octavesOfNotesToGenerate = new int[] { 3, 3, 3, 4, 4, 4, 4 };
 
 	/** The pan controller - to set where in the stereo field a note is played */
 	public int PAN_CONTROLLER = 10;
@@ -55,56 +48,17 @@ public class MIDISoundTranslator implements SoundTranslator
 	/** The volume controller - to audibly represent the distance from our user */
 	public int VOLUME_CONTROLLER = 7;
 
-	public int CUTOFF_FREQUENCY_CONTROLLER = 74;
-	public int FILTER_RESONANCE_CONTROLLER = 71;
-
 	/** Channels not to use for general comment translation (0-indexed) */
 	private TIntArrayList reservedChannels = new TIntArrayList(new int[] { 9, 1, 2, 3 });
 
 	/** Aggregator to work out the average geo location */
 	private AverageGeoLocation avGeoLocAggregator = new AverageGeoLocation();
 
-	/** The average sentiment aggregator */
-	private AverageSentimentAggregator avSentimentAggregator = new AverageSentimentAggregator();
-
-	/** Whether to generate background tracks */
-	private boolean useBackground = false;
-<<<<<<< HEAD
-
 	/**
 	 * A memory of which notes are on which channels (to turn them off before we
 	 * change the sound or change the channel setup.
-=======
-	
-	/** 
-	 * 	A memory of which notes are on which channels (to turn them off before
-	 *  we change the sound or change the channel setup.
->>>>>>> b756787b6c869c3d80754b2faab4ae907be7f469
 	 */
 	private int[] notesOn = new int[16];
-
-	/** The sequencer to use to run the background music */
-	private Sequencer sequencer;
-
-	/** The background music instance */
-	private BackgroundMusic backgroundMusic;
-
-	/** The number of social comments since the last time we checked */
-	private long countSinceLast = 0;
-
-	/** How much the mood needs to change */
-	private int currentMoodAcceleration = 0;
-
-	/** Instruments to change mood - from negative to positive */
-	private int[] moodInstruments = new int[] {
-			MIDIInstruments.BARITONE_SAX,
-			MIDIInstruments.ACOUSTIC_GUITAR_NYLON,
-			MIDIInstruments.KALIMBA,
-			MIDIInstruments.ACOUSTIC_GRAND_PIANO, // Middle
-			MIDIInstruments.ACOUSTIC_GUITAR_STEEL,
-			MIDIInstruments.FX_3_CRYSTAL,
-			MIDIInstruments.FX_5_BRIGHTNESS,
-	};
 
 	/**
 	 * Default constructor
@@ -112,67 +66,10 @@ public class MIDISoundTranslator implements SoundTranslator
 	 * @throws MidiUnavailableException
 	 *             If a synth could not be created
 	 */
-	public MIDISoundTranslator() throws MidiUnavailableException
+	public BasicMIDISoundTranslator() throws MidiUnavailableException
 	{
-		// Open the synthesizer to play the music
 		this.synth = MidiSystem.getSynthesizer();
 		synth.open();
-
-		// Setup the sequencer for the background music, if we're going
-		// to use it.
-		if (useBackground)
-		{
-			this.sequencer = MidiSystem.getSequencer();
-			if (sequencer != null)
-			{
-				sequencer.open();
-
-				try
-				{
-					this.backgroundMusic = new BackgroundMusic();
-
-					// Set up the sequencer.
-					sequencer.setSequence(backgroundMusic.getSequence());
-					sequencer.setTempoInBPM(100);
-
-					// Set the mood to the default mood
-					backgroundMusic.setMood(
-							backgroundMusic.getCurrentMood(), sequencer);
-
-					// We handle looping ourselves so that we can alter the
-					// mood on each loop.
-					sequencer.addMetaEventListener(new MetaEventListener()
-					{
-						@Override
-						public void meta(MetaMessage meta)
-						{
-							// Alter the mood. Calculate the acceleration of the
-							// mood
-							currentMoodAcceleration += (int) ((countSinceLast - 100) / 50);
-							currentMoodAcceleration = (int) Math.signum(currentMoodAcceleration);
-							System.out.println(countSinceLast + " social comments -> " + currentMoodAcceleration);
-
-							// Change mood
-							backgroundMusic.setMood(
-									backgroundMusic.getCurrentMood()
-											+ currentMoodAcceleration, sequencer);
-
-							notesToGenerate = backgroundMusic.getNotesToFitMood(backgroundMusic.getCurrentMood());
-
-							// Loop continuously.
-							countSinceLast = 0;
-							sequencer.setTickPosition(0);
-							sequencer.start();
-						}
-					});
-
-					sequencer.start();
-				} catch (final InvalidMidiDataException e)
-				{
-					e.printStackTrace();
-				}
-			}
-		}
 	}
 
 	/**
@@ -186,15 +83,8 @@ public class MIDISoundTranslator implements SoundTranslator
 	{
 		if (comment.size() == 0)
 			return;
-		countSinceLast += comment.size();
-
 		// The average geo location of all the comments
 		final GeoLocation gl = avGeoLocAggregator.aggregate(comment, userInformation);
-
-		// The average sentiment of all the comments
-		double sentimentScore = avSentimentAggregator.aggregate(comment, userInformation);
-		sentimentScore = (int) (64 + (sentimentScore * 64));
-		System.out.println("Sentiment: " + sentimentScore);
 
 		// Give a bit more range to the notes we've provided
 		final int alterOctave = (int) (Math.random() * 3) - 1;
@@ -202,25 +92,15 @@ public class MIDISoundTranslator implements SoundTranslator
 		// Create the note
 		final int indx = (int) (Math.random() * notesToGenerate.length);
 		final WesternScaleNote note = WesternScaleNote.createNote(
-				notesToGenerate[indx]);
-		note.noteNumber += 12 * alterOctave;
+				notesToGenerate[indx],
+				octavesOfNotesToGenerate[indx] + alterOctave);
 
 		// Get the channel
-<<<<<<< HEAD
-		final MidiChannel chan = synth.getChannels()[nextChannel];
-
-		// Choose an appropriate instrument based on sentiment.
-		final int prog = moodInstruments[(int) Math.max(0, Math.min(
-				moodInstruments.length - 1, sentimentScore * moodInstruments.length / 127))];
-		System.out.println("Program: " + prog);
-		chan.programChange(prog);
-=======
 		// System.out.println( nextChannel );
 		final MidiChannel chan = synth.getChannels()[nextChannel];
 
 		// For now we will just use the piano
-		chan.programChange(35);
->>>>>>> b756787b6c869c3d80754b2faab4ae907be7f469
+		chan.programChange(10);
 
 		// Set the pan position
 		chan.controlChange(PAN_CONTROLLER,
@@ -230,19 +110,11 @@ public class MIDISoundTranslator implements SoundTranslator
 		chan.controlChange(VOLUME_CONTROLLER,
 				getUserDistanceVolume(gl, userInformation.location));
 
-		// Set the brightness of the sound based on the sentiment score
-		chan.controlChange(FILTER_RESONANCE_CONTROLLER, 40);
-		chan.controlChange(CUTOFF_FREQUENCY_CONTROLLER, (int) sentimentScore);
-
 		// Stop the previous note on this channel
 		chan.noteOff(notesOn[nextChannel]);
 
 		// Play the note
-<<<<<<< HEAD
 		chan.noteOn(note.noteNumber, 100);
-=======
-		chan.noteOn(note.noteNumber, MIDIInstruments.FX_5_BRIGHTNESS);
->>>>>>> b756787b6c869c3d80754b2faab4ae907be7f469
 		notesOn[nextChannel] = note.noteNumber;
 
 		// Increment the channel to the next one.
@@ -297,7 +169,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		// divide by that and multiply by the maximum our volume can be. In this
 		// case to avoid completely inaudible updates, our minimum will be
 		// 27, so range = 100
-		final int volume = 127 - ((int) (d * 100 / 20020) + 27);
+		final int volume = (int) (d * 100 / 20020) + 27;
 
 		return volume;
 	}
@@ -326,15 +198,15 @@ public class MIDISoundTranslator implements SoundTranslator
 
 		// Create 20 random social comments
 		final MIDISoundTranslator mst = new MIDISoundTranslator();
-		for (int i = 0; i < 36; i++)
+		for (int i = 0; i < 20; i++)
 		{
 			final SocialComment comment = new SocialComment();
-			comment.location = new GeoLocation( /* Math.random()*9 */0, i * 10 - 180);
+			comment.location = new GeoLocation(Math.random() * 90, Math.random() * 360 - 180);
 
 			mst.translate(Collections.singleton(comment), userInformation);
 			Thread.sleep(600);
 		}
 
-		Thread.sleep(50000);
+		Thread.sleep(5000);
 	}
 }
