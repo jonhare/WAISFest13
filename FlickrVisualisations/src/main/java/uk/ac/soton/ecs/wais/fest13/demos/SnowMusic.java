@@ -4,24 +4,17 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JFrame;
 
-import org.openimaj.image.DisplayUtilities;
 import org.openimaj.image.MBFImage;
-import org.openimaj.image.colour.ColourSpace;
-import org.openimaj.image.colour.RGBColour;
-import org.openimaj.image.typography.hershey.HersheyFont;
-import org.openimaj.math.geometry.shape.Rectangle;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.Stream;
 
 import uk.ac.soton.ecs.jsh2.mediaeval13.placing.evaluation.GeoLocation;
-import uk.ac.soton.ecs.sound.vis.FlickrTagFilter;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePostedWindow;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePredicate;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
@@ -37,17 +30,18 @@ import uk.ac.soton.ecs.wais.fest13.sound.midi.MIDISoundTranslator;
 
 public class SnowMusic {
 	public static void main(String[] args) throws FileNotFoundException, MidiUnavailableException {
-//		final MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
-//		final JFrame wind = DisplayUtilities.displaySimple(img);
+		// final MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
+		// final JFrame wind = DisplayUtilities.displaySimple(img);
 		final MBFImage img = FullScreenDemo.createImage();
 		final JFrame wind = FullScreenDemo.display(img, "Snow Music");
 
 		final SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 
-		final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
+		final String data = "/Users/jon/Data/data-takensort.csv";
 		// final String data = "/home/dd/data-takensort.csv";
-		// final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
-//		final String data = "/Users/jamie/Data/data-taken.csv";
+		// final String data =
+		// "/Users/ss/Development/java/WAISFest13/data-taken.csv";
+		// final String data = "/Users/jamie/Data/data-taken.csv";
 		final FlickrImageHeatmapOperation heatmapOp = new FlickrImageHeatmapOperation(img);
 		final FlickrImageDrawOperation imagePointOp = new FlickrImageDrawOperation(img);
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
@@ -63,7 +57,7 @@ public class SnowMusic {
 						comments.clear();
 
 						((Stream<Context>) object.get("window"))
-								.filter(new FlickrTagFilter("snow"))
+								// .filter(new FlickrTagFilter("snow"))
 								.filter(new PassThrough<Context>(heatmapOp))
 								.filter(new PassThrough<Context>(imagePointOp))
 								.filter(new PassThrough<Context>(new FlickrImageSoundOperation(comments)))
@@ -75,9 +69,9 @@ public class SnowMusic {
 						trans.translate(comments, userInformation);
 
 						imagePointOp.windowDrawn(object);
-//						heatmapOp.windowDrawn(object);
-						
-//						DisplayUtilities.display(img, wind);
+						// heatmapOp.windowDrawn(object);
+
+						// DisplayUtilities.display(img, wind);
 						FullScreenDemo.update(wind, img);
 
 						try {
