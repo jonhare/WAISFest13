@@ -15,6 +15,7 @@ import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.Stream;
 
 import uk.ac.soton.ecs.jsh2.mediaeval13.placing.evaluation.GeoLocation;
+import uk.ac.soton.ecs.sound.vis.FlickrTagFilter;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePostedWindow;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePredicate;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
@@ -57,7 +58,7 @@ public class SnowMusic {
 						comments.clear();
 
 						((Stream<Context>) object.get("window"))
-								// .filter(new FlickrTagFilter("snow"))
+								.filter(new FlickrTagFilter("snow"))
 								.filter(new PassThrough<Context>(heatmapOp))
 								.filter(new PassThrough<Context>(imagePointOp))
 								.filter(new PassThrough<Context>(new FlickrImageSoundOperation(comments)))
