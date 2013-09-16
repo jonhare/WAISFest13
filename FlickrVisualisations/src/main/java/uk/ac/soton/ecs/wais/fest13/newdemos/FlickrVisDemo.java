@@ -32,7 +32,11 @@ public abstract class FlickrVisDemo implements KeyListener {
 	protected final static String data = "/Users/jamie/Data/data-taken.csv";
 
 //	protected final static MBFImage img = FullScreenDemo.createImage();
-	protected final static MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
+//	protected final static MBFImage img = new MBFImage(1080, 580, ColourSpace.RGB);
+	protected final static MBFImage img = new MBFImage(
+			GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().width,
+			GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds().height,
+			ColourSpace.RGB);
 	protected final static SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd");
 	protected final static List<SocialComment> comments = new ArrayList<SocialComment>();
 	protected final static UserInformation userInformation = new UserInformation();
