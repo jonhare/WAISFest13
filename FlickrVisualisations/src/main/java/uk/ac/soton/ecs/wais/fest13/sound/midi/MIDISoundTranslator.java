@@ -8,6 +8,7 @@ import gnu.trove.list.array.TIntArrayList;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Iterator;
 
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaEventListener;
@@ -15,6 +16,7 @@ import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiChannel;
 import javax.sound.midi.MidiSystem;
 import javax.sound.midi.MidiUnavailableException;
+import javax.sound.midi.Sequence;
 import javax.sound.midi.Sequencer;
 import javax.sound.midi.Synthesizer;
 
@@ -144,6 +146,9 @@ public class MIDISoundTranslator implements SoundTranslator
 					this.backgroundMusic.setMood(
 						this.backgroundMusic.getCurrentMood(), this.sequencer );
 
+					// The background music can return a new sequence when next() is called
+					final Iterator<Sequence> bi = this.backgroundMusic.iterator();
+
 					// We handle looping ourselves so that we can alter the
 					// mood on each loop.
 					this.sequencer.addMetaEventListener( new MetaEventListener()
@@ -165,6 +170,22 @@ public class MIDISoundTranslator implements SoundTranslator
 
 							// Loop continuously.
 							MIDISoundTranslator.this.countSinceLast = 0;
+
+							// Try and get a new sequence
+							try
+							{
+								MIDISoundTranslator.this.sequencer.setSequence( bi.next() );
+							}
+							catch( final InvalidMidiDataException e )
+							{
+								e.printStackTrace();
+							}
+
+							// Change the speed if things get more active
+							MIDISoundTranslator.this.sequencer.setTempoInBPM(
+									80 + MIDISoundTranslator.this.backgroundMusic.getCurrentMood()*5 );
+
+							// Restart the sequencer
 							MIDISoundTranslator.this.sequencer.setTickPosition(0);
 							MIDISoundTranslator.this.sequencer.start();
 						}
@@ -297,7 +318,10 @@ public class MIDISoundTranslator implements SoundTranslator
 	@Override
 	public void stop()
 	{
-		this.synth.close();
+		if( this.sequencer != null )
+			this.sequencer.stop();
+		if( this.synth != null )
+			this.synth.close();
 	}
 
 	/**
