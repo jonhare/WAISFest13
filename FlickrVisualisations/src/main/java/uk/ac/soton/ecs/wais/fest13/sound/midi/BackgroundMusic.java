@@ -2,6 +2,8 @@ package uk.ac.soton.ecs.wais.fest13.sound.midi;
 
 import gnu.trove.list.array.TIntArrayList;
 
+import java.util.Iterator;
+
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MetaMessage;
 import javax.sound.midi.MidiEvent;
@@ -19,7 +21,7 @@ import org.openimaj.audio.util.WesternScaleNote;
  * @created 12 Sep 2013
  * @version $Author$, $Revision$, $Date$
  */
-public class BackgroundMusic
+public class BackgroundMusic implements Iterable<Sequence>, Iterator<Sequence>
 {
 	/**
 	 * Get a program change message.
@@ -117,6 +119,11 @@ public class BackgroundMusic
 			"H10+B2.60 . . . . . . . B2.60 . . . . . . . / "
 	};
 
+	/** States which tracks (above) are transposable */
+	private final boolean[] transposable = new boolean[]{
+		true, true, false, false, true, true, true, true, false
+	};
+
 	private int currentMood = 0;
 
 	/**
@@ -131,6 +138,16 @@ public class BackgroundMusic
 			new TIntArrayList( new int[] { 0, 1, 2, 3, 4, 8 } ),
 			new TIntArrayList( new int[] { 0, 6, 2, 3, 5, 8 } ),
 			new TIntArrayList( new int[] { 0, 6, 2, 3, 5, 8 } )
+	};
+
+	/** States which moods should be transposed */
+	private final boolean transposeOnMood[] = new boolean[] {
+		false, false, false, false, true, true, true
+	};
+
+	/** Some semi-tone transposes to do */
+	private final int transposes[] = new int[]{
+			0, 0, 0, -7, 7
 	};
 
 	/** Notes based on the original hang-drum */
@@ -156,6 +173,15 @@ public class BackgroundMusic
 	 */
 	public Sequence getSequence()
 	{
+		return this.getSequence( 0 );
+	}
+
+	/**
+	 * May return null if the sequence was unable to be created.
+	 * @return The sequence
+	 */
+	public Sequence getSequence( final int transpose )
+	{
 		// Create a new sequence
 		Sequence s;
 		try
@@ -171,8 +197,10 @@ public class BackgroundMusic
 		final double velocityScalar = 1;
 
 		// Loop through each of the tracks.
-		for( final String track : this.tracks )
+		for( int t = 0; t < this.tracks.length; t++ )
 		{
+			final String track = this.tracks[t];
+
 			// Create a sequencer track for the part
 			final Track seqTrack = s.createTrack();
 
@@ -184,6 +212,8 @@ public class BackgroundMusic
 			int currentChannel = 0;
 			int currentVelocity = 100;
 			int currentNoteOn = -1;
+
+			final int tp = (this.transposable[t] ? transpose : 0);
 
 			// Loop through the pulses
 			for( final String pulse : pulses )
@@ -219,7 +249,7 @@ public class BackgroundMusic
 								else
 								{
 									final WesternScaleNote note = WesternScaleNote.createNote( command.substring( 1 ) );
-									seqTrack.add( this.noteOff( currentChannel, note.noteNumber, timestampTick ) );
+									seqTrack.add( this.noteOff( currentChannel, note.noteNumber+tp, timestampTick ) );
 								}
 
 								a--;
@@ -259,8 +289,8 @@ public class BackgroundMusic
 									seqTrack.add( this.noteOff( currentChannel, currentNoteOn, timestampTick ) );
 
 								seqTrack.add( this.noteOn( currentChannel,
-										note.noteNumber, (int) (currentVelocity * velocityScalar), timestampTick ) );
-								currentNoteOn = note.noteNumber;
+										note.noteNumber+tp, (int) (currentVelocity * velocityScalar), timestampTick ) );
+								currentNoteOn = note.noteNumber+tp;
 
 								if( samePulse )
 								{
@@ -381,5 +411,51 @@ public class BackgroundMusic
 	public String[] getNotesToFitMood( final int moodIndex )
 	{
 		return this.fittingNotes[moodIndex];
+	}
+
+	/**
+	 *	{@inheritDoc}
+	 * 	@see java.lang.Iterable#iterator()
+	 */
+	@Override
+	public Iterator<Sequence> iterator()
+	{
+		return this;
+	}
+
+	/**
+	 *	{@inheritDoc}
+	 * 	@see java.util.Iterator#hasNext()
+	 */
+	@Override
+	public boolean hasNext()
+	{
+		return true;
+	}
+
+	/**
+	 *	{@inheritDoc}
+	 * 	@see java.util.Iterator#next()
+	 */
+	@Override
+	public Sequence next()
+	{
+		if( this.transposeOnMood[this.currentMood] )
+		{
+			final int i = (int)(Math.random() * this.transposes.length);
+			return this.getSequence( this.transposes[i] );
+		}
+
+		return this.getSequence();
+	}
+
+	/**
+	 *	{@inheritDoc}
+	 * 	@see java.util.Iterator#remove()
+	 */
+	@Override
+	public void remove()
+	{
+		// Not implemented
 	}
 }
