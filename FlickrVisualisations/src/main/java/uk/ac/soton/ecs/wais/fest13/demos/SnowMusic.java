@@ -26,7 +26,6 @@ import uk.ac.soton.ecs.sound.vis.FlickrTimePostedWindow;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePredicate;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream.FlickrImageSoundOperation;
-import uk.ac.soton.ecs.wais.fest13.FlickrImageDrawOperation;
 import uk.ac.soton.ecs.wais.fest13.FullScreenDemo;
 import uk.ac.soton.ecs.wais.fest13.GetAll;
 import uk.ac.soton.ecs.wais.fest13.PassThrough;
@@ -48,8 +47,8 @@ public class SnowMusic {
 
 //		final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
 		// final String data = "/home/dd/data-takensort.csv";
-		// final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
-		final String data = "/Users/jamie/Data/data-taken.csv";
+		 final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
+//		final String data = "/Users/jamie/Data/data-taken.csv";
 		
 		final FlickrImageHeatmapOperation heatmapOp = new FlickrImageHeatmapOperation(img);
 		final FlickrImageDrawOperation imagePointOp = new FlickrImageDrawOperation(img, RGBColour.YELLOW);
@@ -57,13 +56,10 @@ public class SnowMusic {
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 		
 		final SoundTranslator trans = new MIDISoundTranslator();
-//		final SoundTranslator trans = new BasicMIDISoundTranslator();
-		
 		final MBFImage worldmap = StaticWorldMap.getMap(wind.getWidth(), wind.getHeight(),
 				new Float[]{1f, 1f, 1f, 0f},
 				new Float[]{1f, 1f, 1f, 0f},
 				new Float[]{1f, 1f, 1f, 0.2f});
-		
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
@@ -71,14 +67,14 @@ public class SnowMusic {
 					@SuppressWarnings("unchecked")
 					@Override
 					public void perform(Context object) {
-						img.multiplyInplace(0.95f);
-						img.drawImage(worldmap, 0, 0);
+//						img.drawImage(worldmap, 0, 0);
+						img.fill(RGBColour.BLACK);
 						comments.clear();
 
 						((Stream<Context>) object.get("window"))
-								.filter(new FlickrTagFilter("snow"))
+//								.filter(new FlickrTagFilter("snow"))
 								.filter(new PassThrough<Context>(heatmapOp))
-								.filter(new PassThrough<Context>(imagePointOp))
+//								.filter(new PassThrough<Context>(imagePointOp))
 								.filter(new PassThrough<Context>(new FlickrImageSoundOperation(comments)))
 								.forEach(new GetAll<Context>());
 
@@ -86,10 +82,13 @@ public class SnowMusic {
 						userInformation = new UserInformation();
 						userInformation.location = new GeoLocation(51.5, 0);
 						trans.translate(comments, userInformation);
-
-//						heatmapOp.windowDrawn(object);
-						imagePointOp.windowDrawn(object);
 						
+						
+						heatmapOp.windowDrawn(object);
+//						imagePointOp.windowDrawn(object);
+						img.drawShapeFilled(new Rectangle(0, img.getHeight() - 40, img.getWidth(), 40), RGBColour.BLACK);
+						img.drawText(df.format(new Date((Long) object.get("start"))), 0, img.getHeight(),
+								HersheyFont.ROMAN_SIMPLEX, 18, RGBColour.WHITE);
 						DisplayUtilities.display(img, wind);
 //						FullScreenDemo.update(wind, img);
 
