@@ -5,12 +5,9 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import java.util.NoSuchElementException;
 
-import org.openimaj.image.analysis.algorithm.histogram.WindowedHistogramExtractor;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.AbstractStream;
@@ -37,8 +34,8 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 			final SocialComment ret = new SocialComment();
 			ret.location = new GeoLocation((Double) object.getTyped(FlickrCSVStream.LATITUDE),
 					(Double) object.getTyped(FlickrCSVStream.LONGITUDE));
-			RateSentiment sent = new RateSentiment();
-			sent.calculate((String[])object.getTyped(FlickrCSVStream.TAGS));
+			final RateSentiment sent = new RateSentiment();
+			sent.calculate((String[]) object.getTyped(FlickrCSVStream.TAGS));
 			ret.sentimentScore = sent.mean;
 			return ret;
 		}
@@ -91,7 +88,7 @@ public class FlickrCSVStream extends AbstractStream<Context> {
 		final String[] parts = nextLine.split(CSV_REGEX);
 
 		final Context ctx = new Context();
-		ctx.put(FLICKR_ID, parts[0]);
+		ctx.put(FLICKR_ID, Long.parseLong(parts[0]));
 		ctx.put(USER_ID, parts[2]);
 		ctx.put(URL, parts[3]);
 		ctx.put(TAGS, parts[4].replaceAll("\"", "").split(" "));
