@@ -47,8 +47,8 @@ public class SnowMusic {
 
 //		final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
 		// final String data = "/home/dd/data-takensort.csv";
-		 final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
-//		final String data = "/Users/jamie/Data/data-taken.csv";
+//		 final String data = "/Users/ss/Development/java/WAISFest13/data-taken.csv";
+		final String data = "/Users/jamie/Data/data-taken.csv";
 		
 		final FlickrImageHeatmapOperation heatmapOp = new FlickrImageHeatmapOperation(img);
 		final FlickrImageDrawOperation imagePointOp = new FlickrImageDrawOperation(img, RGBColour.YELLOW);
@@ -56,10 +56,12 @@ public class SnowMusic {
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 		
 		final SoundTranslator trans = new MIDISoundTranslator();
+		
 		final MBFImage worldmap = StaticWorldMap.getMap(wind.getWidth(), wind.getHeight(),
 				new Float[]{1f, 1f, 1f, 0f},
 				new Float[]{1f, 1f, 1f, 0f},
 				new Float[]{1f, 1f, 1f, 0.2f});
+		
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))

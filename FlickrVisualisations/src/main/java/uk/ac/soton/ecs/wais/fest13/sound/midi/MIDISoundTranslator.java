@@ -295,6 +295,7 @@ public class MIDISoundTranslator implements SoundTranslator
 	@Override
 	public void stop()
 	{
+		this.sequencer.stop();
 		this.synth.close();
 	}
 

@@ -13,7 +13,8 @@ public class PassThrough<T> implements Predicate<T> {
 
 	@Override
 	public boolean test(T object) {
-		op.perform(object);
+		if(op != null)
+			op.perform(object);
 		return true;
 	}
 
