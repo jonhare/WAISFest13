@@ -16,6 +16,7 @@ import org.openimaj.util.function.Operation;
 import org.openimaj.util.stream.Stream;
 
 import uk.ac.soton.ecs.jsh2.mediaeval13.placing.evaluation.GeoLocation;
+import uk.ac.soton.ecs.sound.vis.FlickrTagFilter;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePostedWindow;
 import uk.ac.soton.ecs.sound.vis.FlickrTimePredicate;
 import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
@@ -49,10 +50,12 @@ public class SnowMusic {
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 
 		final SoundTranslator trans = new MIDISoundTranslator();
+		
 		final MBFImage worldmap = StaticWorldMap.getMap(wind.getWidth(), wind.getHeight(),
 				new Float[] { 1f, 1f, 1f, 0f },
 				new Float[] { 1f, 1f, 1f, 0f },
 				new Float[] { 1f, 1f, 1f, 0.2f });
+		
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
@@ -65,7 +68,7 @@ public class SnowMusic {
 						comments.clear();
 
 						((Stream<Context>) object.get("window"))
-								// .filter(new FlickrTagFilter("snow"))
+								.filter(new FlickrTagFilter("snow"))
 								.filter(new PassThrough<Context>(heatmapOp))
 								// .filter(new
 								// PassThrough<Context>(imagePointOp))
@@ -76,8 +79,8 @@ public class SnowMusic {
 						userInformation = new UserInformation();
 						userInformation.location = new GeoLocation(51.5, 0);
 						trans.translate(comments, userInformation);
-						imagePointOp.windowDrawn(object);
-						// heatmapOp.windowDrawn(object);
+						// imagePointOp.windowDrawn(object);
+						heatmapOp.windowDrawn(object);
 
 						// DisplayUtilities.display(img, wind);
 						FullScreenDemo.update(wind, img);
