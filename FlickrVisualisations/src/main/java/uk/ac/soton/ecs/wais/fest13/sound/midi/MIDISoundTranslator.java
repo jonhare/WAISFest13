@@ -193,7 +193,7 @@ public class MIDISoundTranslator implements SoundTranslator
 		// The average geo location of all the comments
 		final GeoLocation gl = this.avGeoLocAggregator.aggregate( comment, userInformation );
 
-		// The average sentiment of all the comments
+		// The average sentiment of all the comments (0-127 with 64 the middle neutral sentiment)
 		double sentimentScore = this.avSentimentAggregator .aggregate( comment, userInformation );
 		sentimentScore = (int)(64+(sentimentScore*64));
 		System.out.println( "Sentiment: "+sentimentScore );
@@ -211,8 +211,10 @@ public class MIDISoundTranslator implements SoundTranslator
 		// System.out.println( nextChannel );
 		final MidiChannel chan = this.synth.getChannels()[this.nextChannel];
 
-		// For now we will just use the piano
-		chan.programChange(0);
+		// Convert 0-127 sentiment score into our mood instruments index
+		final int miIndex = (int)Math.floor(
+				Math.max(0,Math.min(127,sentimentScore))*this.moodInstruments.length/128);
+		chan.programChange( this.moodInstruments[miIndex] );
 
 		// Set the pan position
 		chan.controlChange( this.PAN_CONTROLLER,

@@ -8,7 +8,8 @@ import uk.ac.soton.ecs.wais.fest13.FlickrCSVStream;
 public class FlickrTimePredicate implements Predicate<Context> {
 	@Override
 	public boolean test(Context object) {
-		if ((Long) object.get(FlickrCSVStream.DATE_TAKEN) < 946706400L)
+		// if ((Long) object.get(FlickrCSVStream.DATE_TAKEN) < 946706400L)
+		if ((Long) object.get(FlickrCSVStream.DATE_TAKEN) < 1104559200L)
 			return false;
 		if ((Long) object.get(FlickrCSVStream.DATE_TAKEN) > System.currentTimeMillis() / 1000L)
 			return false;
