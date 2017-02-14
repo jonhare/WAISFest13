@@ -50,12 +50,12 @@ public class SnowMusic {
 		final List<SocialComment> comments = new ArrayList<SocialComment>();
 
 		final SoundTranslator trans = new MIDISoundTranslator();
-		
+
 		final MBFImage worldmap = StaticWorldMap.getMap(wind.getWidth(), wind.getHeight(),
 				new Float[] { 1f, 1f, 1f, 0f },
 				new Float[] { 1f, 1f, 1f, 0f },
 				new Float[] { 1f, 1f, 1f, 0.2f });
-		
+
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
 				.transform(new FlickrTimePostedWindow(24 * 60 * 60 * 1000L))
@@ -69,9 +69,8 @@ public class SnowMusic {
 
 						((Stream<Context>) object.get("window"))
 								.filter(new FlickrTagFilter("snow"))
-								.filter(new PassThrough<Context>(heatmapOp))
-								// .filter(new
-								// PassThrough<Context>(imagePointOp))
+								// .filter(new PassThrough<Context>(heatmapOp))
+								.filter(new PassThrough<Context>(imagePointOp))
 								.filter(new PassThrough<Context>(new FlickrImageSoundOperation(comments)))
 								.forEach(new GetAll<Context>());
 
@@ -79,7 +78,7 @@ public class SnowMusic {
 						userInformation = new UserInformation();
 						userInformation.location = new GeoLocation(51.5, 0);
 						trans.translate(comments, userInformation);
-						// imagePointOp.windowDrawn(object);
+						imagePointOp.windowDrawn(object);
 						heatmapOp.windowDrawn(object);
 
 						// DisplayUtilities.display(img, wind);

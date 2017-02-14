@@ -1,10 +1,9 @@
 package uk.ac.soton.ecs.wais.fest13;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
 
-import org.openimaj.io.IOUtils;
 import org.openimaj.util.array.ArrayUtils;
 import org.openimaj.util.iterator.TextLineIterable;
 
@@ -25,22 +24,32 @@ public class LoadHistograms {
 			}
 		}
 
-		final HashMap<Long, Integer> map = new HashMap<Long, Integer>();
+		// final DataOutputStream dos = new DataOutputStream(new
+		// BufferedOutputStream(new FileOutputStream(
+		// "/Users/jsh2/Data/dominantColours.bin")));
+		// final HashMap<Long, Integer> map = new HashMap<Long, Integer>();
+		final FileWriter fos = new FileWriter(new File("/Users/jsh2/Data/nyc-dominant-colours.csv"));
 		final float[] vec = new float[64];
-		for (final String line : new TextLineIterable(new File("/Users/jsh2/Data/colours.csv"))) {
+		for (final String line : new TextLineIterable(new File("/Users/jsh2/Data/nyc-colours.csv"))) {
 			final String[] parts = line.split(",");
 
-			final long id = Long.parseLong(parts[0]);
+			final long id = Long.parseLong(parts[0].trim());
 			for (int i = 0; i < 64; i++)
-				vec[i] = Float.parseFloat(parts[i + 1]);
+				vec[i] = Float.parseFloat(parts[i + 1].trim());
 
 			final int idx = ArrayUtils.maxIndex(vec);
-			map.put(id, idx);
 
-			if (map.size() % 1000 == 0)
-				System.out.println(map.size());
+			fos.write(id + ", " + cols[idx][0] + ", " + cols[idx][1] + ", " + cols[idx][2] + "\n");
+			// map.put(id, idx);
+			// dos.writeLong(id);
+			// dos.writeInt(idx);
+
+			// if (map.size() % 1000 == 0)
+			// System.out.println(map.size());
 		}
-
-		IOUtils.writeToFile(map, new File("/Users/jsh2/Data/dominantColours.bin"));
+		fos.close();
+		// dos.close();
+		// IOUtils.writeToFile(map, new
+		// File("/Users/jsh2/Data/dominantColours.bin"));
 	}
 }

@@ -1,15 +1,19 @@
 package uk.ac.soton.ecs.wais.fest13.demos;
 
+import gnu.trove.map.hash.TLongIntHashMap;
+
+import java.io.BufferedInputStream;
+import java.io.DataInputStream;
+import java.io.EOFException;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.HashMap;
 
 import javax.sound.midi.MidiUnavailableException;
 import javax.swing.JFrame;
 
 import org.openimaj.image.MBFImage;
 import org.openimaj.image.colour.RGBColour;
-import org.openimaj.io.IOUtils;
 import org.openimaj.math.geometry.point.Point2dImpl;
 import org.openimaj.util.data.Context;
 import org.openimaj.util.function.Operation;
@@ -45,7 +49,17 @@ public class ColourMap {
 			}
 		}
 
-		final HashMap<Long, Integer> colMap = IOUtils.readFromFile(new File("/Users/jsh2/Data/dominantColours.bin"));
+		// final HashMap<Long, Integer> colMap = IOUtils.readFromFile(new
+		// File("/Users/jsh2/Data/dominantColours.bin"));
+		final TLongIntHashMap colMap = new TLongIntHashMap();
+		final DataInputStream dis = new DataInputStream(new BufferedInputStream(new FileInputStream(
+				"/Users/jsh2/Data/dominantColours.bin")));
+		try {
+			while (true) {
+				colMap.put(dis.readLong(), dis.readInt());
+			}
+		} catch (final EOFException e) {
+		}
 
 		new FlickrCSVStream(new File(data))
 				.filter(new FlickrTimePredicate())
@@ -57,13 +71,14 @@ public class ColourMap {
 						img.fill(RGBColour.BLACK);
 
 						((Stream<Context>) object.get("window"))
-								.filter(new FlickrTagFilter("sun"))
+								.filter(new FlickrTagFilter("snow"))
 								.forEach(new Operation<Context>() {
 									@Override
 									public void perform(Context ctx) {
-										final Integer colIdx = colMap.get(ctx.get(FlickrCSVStream.FLICKR_ID));
-										if (colIdx == null)
+										final long fid = (Long) ctx.get(FlickrCSVStream.FLICKR_ID);
+										if (!colMap.contains(fid))
 											return;
+										final int colIdx = colMap.get(fid);
 
 										final double x = (Double) ctx.get(FlickrCSVStream.LONGITUDE) + 180;
 										final double y = 90 - (Double) ctx.get(FlickrCSVStream.LATITUDE);

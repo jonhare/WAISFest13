@@ -15,9 +15,10 @@ import org.openimaj.hadoop.sequencefile.TextBytesSequenceFileUtility;
 public class ExtractHistograms {
 	public static void main(String[] args) throws IOException {
 		final String dataPath =
-				"hdfs://seurat/data/mediaeval/placing/images-rgbhist444-v2.seq/";
+				"hdfs://seurat.ecs.soton.ac.uk/user/jsh2/nyc-flickr-geo-rgbhist444.seq";
+		// "hdfs://seurat/data/mediaeval/placing/images-rgbhist444-v2.seq/";
 
-		final BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/jsh2/Data/colours.csv"));
+		final BufferedWriter bw = new BufferedWriter(new FileWriter("/Users/jsh2/Data/nyc-colours.csv"));
 
 		final Path[] paths = SequenceFileUtility.getFilePaths(dataPath, "part-m-");
 
